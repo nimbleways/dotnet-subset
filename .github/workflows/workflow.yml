@@ -1,0 +1,39 @@
+name: CI workflow
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  SourceRevisionId: ${{ github.sha }}
+  Configuration: "Release"
+
+jobs:
+  build_test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore dependencies
+      run: dotnet restore
+    - name: Check format
+      run: dotnet format --no-restore --verify-no-changes --verbosity detailed
+    - name: Build
+      run: dotnet build --no-restore
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+    - name: Pack
+      run: dotnet pack --no-build --verbosity normal
+    - name: Upload nupkg artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: dotnet-subset-nupkg-artifact
+        retention-days: "15"
+        path: |
+          artifacts/**/*.nupkg

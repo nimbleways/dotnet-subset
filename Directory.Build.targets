@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <IsPackable Condition="'$(PackAsTool)' == 'true'">true</IsPackable>
+    <IsPublishable>$(IsPackable)</IsPublishable>
+  </PropertyGroup>
+</Project>

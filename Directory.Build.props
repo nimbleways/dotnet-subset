@@ -1,0 +1,89 @@
+<Project>
+  <PropertyGroup>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- https://www.meziantou.net/csharp-compiler-strict-mode.htm -->
+    <Features>strict;$(Features)</Features>
+    <LangVersion>Latest</LangVersion>
+    <Deterministic>true</Deterministic>
+    <DebugType>embedded</DebugType>
+    <IsPackable>false</IsPackable>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <PublishIISAssets Condition="'$(PublishIISAssets)' == ''">false</PublishIISAssets>
+  </PropertyGroup>
+    
+  <!-- Treat warning as errors -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- https://github.com/dotnet/roslyn/blob/main/docs/compilers/CSharp/Warnversion%20Warning%20Waves.md -->
+    <WarningLevel>9999</WarningLevel>
+    <!-- Comma-seperated warning ids that show but don't fail the build (eg: 0219,0168) -->
+    <WarningsNotAsErrors></WarningsNotAsErrors>
+    <!-- https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props?view=aspnetcore-6.0#optimizeimplicitlytriggeredbuild -->
+    <OptimizeImplicitlyTriggeredBuild>true</OptimizeImplicitlyTriggeredBuild>
+  </PropertyGroup>
+    
+  <!-- Analysis settings -->
+  <PropertyGroup>
+    <AnalysisLevel>latest-All</AnalysisLevel>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Workaround to enable rule "IDE0005: Using directive is unnecessary" -->
+    <!-- https://github.com/dotnet/roslyn/issues/41640#issuecomment-985780130 -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591;CS1573</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+      <AssemblyAttribute Include="System.CLSCompliantAttribute">
+          <_Parameter1>false</_Parameter1>
+      </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- Product and company metadata -->
+  <PropertyGroup>
+    <Product>dotnet-subset</Product>
+    <Description>.NET Tool to copy a subset of files from a repository to a directory</Description>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <Company>Nimbleways</Company>
+    <Authors>$(Company.ToLower())</Authors>
+    <Copyright>© $(Company). All rights reserved.</Copyright>
+  </PropertyGroup>
+    
+  <!-- Build output layout -->
+  <!-- Inspired from https://github.com/dotnet/aspnetcore/blob/41ce223c1cf4ffd482c4ea36e88ed44a94db37b3~1/Directory.Build.props#L136-L166 -->
+  <PropertyGroup>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <ArtifactsDir>$(MSBuildThisFileDirectory)artifacts</ArtifactsDir>
+    <ArtifactsObjDir>$(ArtifactsDir)/obj</ArtifactsObjDir>
+    <ArtifactsBinDir>$(ArtifactsDir)/$(Configuration)/bin</ArtifactsBinDir>
+    <ArtifactsPublishDir>$(ArtifactsDir)/$(Configuration)/publish</ArtifactsPublishDir>
+    <ArtifactsPackageDir>$(ArtifactsDir)/$(Configuration)/nupkg</ArtifactsPackageDir>
+    <OutDirName Condition="'$(OutDirName)' == ''">$(MSBuildProjectName)</OutDirName>
+    <BasePublishDir>$([System.IO.Path]::GetFullPath('$(ArtifactsPublishDir)/$(TargetFramework)/$(OutDirName)'))</BasePublishDir>
+    
+    <!-- MSBuild properties -->
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputPath Condition="'$(BaseOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(ArtifactsBinDir)/$(TargetFramework)/$(OutDirName)'))</OutputPath>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)' == ''">$([System.IO.Path]::GetFullPath('$(ArtifactsObjDir)/$(OutDirName)/'))</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(Configuration)/</IntermediateOutputPath>
+    <PublishDir Condition="'$(PublishDir)' == '' AND '$(RuntimeIdentifier)' != ''">$([System.IO.Path]::GetFullPath('$(BasePublishDir)/$(RuntimeIdentifier)'))</PublishDir>
+    <PublishDir Condition="'$(PublishDir)' == ''">$(BasePublishDir)</PublishDir>
+    <PackageOutputPath>$([System.IO.Path]::GetFullPath('$(ArtifactsPackageDir)/$(OutDirName)'))</PackageOutputPath>
+  </PropertyGroup>
+  
+  <!-- CI settings -->
+  <PropertyGroup>
+    <ContinuousIntegrationBuild Condition="'$(ContinuousIntegrationBuild)' == '' and '$(CI)' != ''">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+  
+  <!-- Nuget config -->
+  <PropertyGroup>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <RestoreLockedMode Condition="'$(RestoreLockedMode)' == '' and '$(ContinuousIntegrationBuild)' == 'true'">true</RestoreLockedMode>
+  </PropertyGroup>
+</Project>
