@@ -48,7 +48,7 @@
   <PropertyGroup>
     <Product>dotnet-subset</Product>
     <Description>.NET Tool to copy a subset of files from a repository to a directory</Description>
-    <VersionPrefix>0.0.1</VersionPrefix>
+    <VersionPrefix>0.1.0</VersionPrefix>
     <Company>Nimbleways</Company>
     <Authors>$(Company.ToLower())</Authors>
     <Copyright>© $(Company). All rights reserved.</Copyright>

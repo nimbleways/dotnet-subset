@@ -27,7 +27,16 @@ The tool is mainly used in Dockerfiles to optimize the docker build caching for 
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="$(RepositoryRoot)README.md" Pack="true" PackagePath="$(PackageReadmeFile)"/>
+    <None Include="$(RepositoryRoot)README.md" Pack="true" PackagePath="$(PackageReadmeFile)" />
   </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Build" Version="17.2.0" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Framework" Version="17.2.0" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Locator" Version="1.4.1" />
+        <PackageReference Include="Microsoft.Build.Tasks.Core" Version="17.2.0" ExcludeAssets="runtime" />
+        <PackageReference Include="Microsoft.Build.Utilities.Core" Version="17.2.0" ExcludeAssets="runtime" />
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
 
 </Project>
