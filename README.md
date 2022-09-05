@@ -6,7 +6,7 @@ The tool is mainly used in Dockerfiles to optimize the docker build caching for 
 
 ## Motivation
 
-To learn more about the motivation behind `dotnet-subset`, please read [the related blog post](https://blog.nimbleways.com/p/45d44a69-5460-4fb3-aacb-be7419b27aad/).
+To learn more about the motivation behind `dotnet-subset`, please read [the related blog post](https://blog.nimbleways.com/docker-build-caching-for-dotnet-applications-done-right-with-dotnet-subset/).
 
 ## Installation
 ### From NuGet
@@ -44,7 +44,9 @@ dotnet subset restore /source/complexapp/complexapp.csproj --root-directory /sou
 ```
 
 ## dotnet-subset + docker
-Please check this pull request on how to use `dotnet-subset` in your `Dockerfile`: https://github.com/othmane-kinane-nw/dotnet-docker/pull/1/files?diff=split&w=0
+Please check these pull requests to see how to use `dotnet-subset` in your `Dockerfile`:
+- https://github.com/othmane-kinane-nw/modular-monolith-with-ddd/pull/1/files?diff=split&w=0
+- https://github.com/othmane-kinane-nw/dotnet-docker/pull/1/files?diff=split&w=0
 
 ## Roadmap
 - [ ] Add tests
