@@ -14,15 +14,26 @@ internal static class RestoreSubset
         using var projectCollection = new ProjectCollection();
         var projectsByFullPath = new Dictionary<string, Project>();
         VisitAllProjects(projectCollection, rootFolder, mainProjectPath, projectsByFullPath);
-        var projectListAsString = string.Join(Environment.NewLine + " - ", projectsByFullPath.Keys);
+        var projectListAsString = string.Join(Environment.NewLine + " - ", projectsByFullPath.Keys.OrderBy(f => f));
         Console.WriteLine($"Found {projectsByFullPath.Count} project(s) to copy:{Environment.NewLine + " - "}{projectListAsString}");
-        var filesInvolvedInRestore = projectsByFullPath.Values.SelectMany(project => GetFilesInvolvedInRestore(rootFolder, project));
         var nugetConfigFiles = GetNugetConfigFiles(rootFolder, projectsByFullPath);
-        var allFilesToCopy = filesInvolvedInRestore.Concat(nugetConfigFiles).Distinct().OrderBy(f => f).ToArray();
+        var extraFilesInvolvedInRestore = projectsByFullPath.Values
+            .SelectMany(project => GetExtraFilesInvolvedInRestore(rootFolder, project))
+            .Concat(nugetConfigFiles)
+            .Distinct()
+            .ToArray();
+        if (extraFilesInvolvedInRestore.Length > 0)
+        {
+            var extraFilesInvolvedInRestoreAsString = string.Join(Environment.NewLine + " - ", extraFilesInvolvedInRestore.OrderBy(f => f));
+            Console.WriteLine($"Found {extraFilesInvolvedInRestore.Length} extra file(s) to copy:{Environment.NewLine + " - "}{extraFilesInvolvedInRestoreAsString}");
+        }
+        var allFilesToCopy = projectsByFullPath.Keys.Concat(extraFilesInvolvedInRestore).Distinct();
 
+        int allFilesCount = 0;
         int copiedFilesCount = 0;
         foreach (var file in allFilesToCopy)
         {
+            ++allFilesCount;
             var destinationFile = Path.Combine(destinationFolder, Path.GetRelativePath(rootFolder, file));
             Directory.CreateDirectory(Path.GetDirectoryName(destinationFile)!);
             if (!File.Exists(destinationFile))
@@ -37,7 +48,7 @@ internal static class RestoreSubset
                 throw new ArgumentException(errorMessage);
             }
         }
-        Console.WriteLine($"Copied {copiedFilesCount} file(s) to '{destinationFolder}'. {allFilesToCopy.Length - copiedFilesCount} file(s) already exist in destination.");
+        Console.WriteLine($"Copied {copiedFilesCount} file(s) to '{destinationFolder}'. {allFilesCount - copiedFilesCount} file(s) already exist in destination.");
     }
 
     private static bool IsSameOrUnder(string rootFolder, string path)
@@ -97,10 +108,8 @@ internal static class RestoreSubset
             .Select(name => GetFullPathWithOriginalCase(name, projectFolder))
             .FirstOrDefault(File.Exists);
     }
-    private static IEnumerable<string> GetFilesInvolvedInRestore(string rootFolder, Project project)
+    private static IEnumerable<string> GetExtraFilesInvolvedInRestore(string rootFolder, Project project)
     {
-        yield return project.FullPath;
-
         var projectFolder = Path.GetDirectoryName(project.FullPath);
         if (projectFolder is null || !Directory.Exists(projectFolder))
         {
