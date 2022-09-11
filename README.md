@@ -1,4 +1,7 @@
 # dotnet-subset
+[![NuGet version (dotnet-subset)](https://img.shields.io/nuget/v/dotnet-subset.svg?style=flat-square)](https://www.nuget.org/packages/dotnet-subset/)
+[![GitHub workflow](https://github.com/nimbleways/dotnet-subset/actions/workflows/workflow.yml/badge.svg?branch=main)](https://github.com/nimbleways/dotnet-subset/actions/workflows/workflow.yml?query=branch%3Amain)
+
 
 `dotnet-subset` is a .NET tool that copies a subset of files from a repository to a directory.
 
@@ -24,23 +27,29 @@ Prerequisite: .NET SDK 6
 ## Usage
 ```
 Description:
-  Create a subset for the restore operation
+  Create a subset for the restore operation.
 
 Usage:
-  dotnet-subset restore <project> [options]
+  dotnet-subset restore <projectOrSolution> [options]
 
 Arguments:
-  <project>  Project or solution to restore
+  <projectOrSolution>  Project or solution to restore.
 
 Options:
-  --root-directory <root-directory> (REQUIRED)  Directory from where the files will be copied
-  --output <output> (REQUIRED)                  Directory where the subset files will be copied, preserving the
-                                                original structure.
+  --root-directory <root-directory> (REQUIRED)  Directory from where the files will be copied, usually the 
+                                                repository's root.
+  --output <output> (REQUIRED)                  Directory where the subset files will be copied,
+                                                preserving the original hierarchy.
+  -?, -h, --help                                Show help and usage information
 ```
 
-Example:
+Example with a project:
 ```
 dotnet subset restore /source/complexapp/complexapp.csproj --root-directory /source/ --output /tmp/restore_subset/
+```
+Example with a solution:
+```
+dotnet subset restore /source/complexapp.sln --root-directory /source/ --output /tmp/restore_subset/
 ```
 
 ## dotnet-subset + docker
