@@ -9,9 +9,9 @@ using Nimbleways.Tools.Subset;
 
 MSBuildLocator.RegisterDefaults();
 
-var projectArgument = new Argument<FileInfo>(
-    name: "project",
-    description: "Project to restore.");
+var projectOrSolutionArgument = new Argument<FileInfo>(
+    name: "projectOrSolution",
+    description: "Project or solution to restore.");
 
 var rootDirectoryOption = new Option<DirectoryInfo>(
     name: "--root-directory",
@@ -30,10 +30,10 @@ var readCommand = new Command("restore", "Create a subset for the restore operat
                 rootDirectoryOption,
                 outputDirectoryOption,
             };
-readCommand.AddArgument(projectArgument);
+readCommand.AddArgument(projectOrSolutionArgument);
 rootCommand.AddCommand(readCommand);
 
-readCommand.SetHandler((project, rootDirectory, outputDirectory) => RestoreSubset.Execute(project.FullName, rootDirectory.FullName, outputDirectory.FullName),
-    projectArgument, rootDirectoryOption, outputDirectoryOption);
+readCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => RestoreSubset.Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
+    projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
 
 return rootCommand.Invoke(args);

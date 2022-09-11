@@ -1,19 +1,23 @@
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
 namespace Nimbleways.Tools.Subset;
 internal static class RestoreSubset
 {
-    public static void Execute(string mainProjectPath, string rootFolder, string destinationFolder)
+    public static void Execute(string projectOrSolution, string rootFolder, string destinationFolder)
     {
-        if (!IsSameOrUnder(rootFolder, mainProjectPath))
+        if (!IsSameOrUnder(rootFolder, projectOrSolution))
         {
-            throw new ArgumentException($"Project '${mainProjectPath}' must be under the root folder '{rootFolder}'");
+            throw new ArgumentException($"Project or solution '${projectOrSolution}' must be under the root folder '{rootFolder}'");
         }
         Directory.CreateDirectory(destinationFolder);
 
         using var projectCollection = new ProjectCollection();
         var projectsByFullPath = new Dictionary<string, Project>();
-        VisitAllProjects(projectCollection, rootFolder, mainProjectPath, projectsByFullPath);
+        foreach (var project in GetRootProjects(projectOrSolution))
+        {
+            VisitAllProjects(projectCollection, rootFolder, project, projectsByFullPath);
+        }
         var projectListAsString = string.Join(Environment.NewLine + " - ", projectsByFullPath.Keys.OrderBy(f => f));
         Console.WriteLine($"Found {projectsByFullPath.Count} project(s) to copy:{Environment.NewLine + " - "}{projectListAsString}");
         var nugetConfigFiles = GetNugetConfigFiles(rootFolder, projectsByFullPath);
@@ -21,11 +25,15 @@ internal static class RestoreSubset
             .SelectMany(project => GetExtraFilesInvolvedInRestore(rootFolder, project))
             .Concat(nugetConfigFiles)
             .Distinct()
-            .ToArray();
-        if (extraFilesInvolvedInRestore.Length > 0)
+            .ToList();
+        if (IsSolutionFile(projectOrSolution))
+        {
+            extraFilesInvolvedInRestore.Add(projectOrSolution);
+        }
+        if (extraFilesInvolvedInRestore.Count > 0)
         {
             var extraFilesInvolvedInRestoreAsString = string.Join(Environment.NewLine + " - ", extraFilesInvolvedInRestore.OrderBy(f => f));
-            Console.WriteLine($"Found {extraFilesInvolvedInRestore.Length} extra file(s) to copy:{Environment.NewLine + " - "}{extraFilesInvolvedInRestoreAsString}");
+            Console.WriteLine($"Found {extraFilesInvolvedInRestore.Count} extra file(s) to copy:{Environment.NewLine + " - "}{extraFilesInvolvedInRestoreAsString}");
         }
         var allFilesToCopy = projectsByFullPath.Keys.Concat(extraFilesInvolvedInRestore).Distinct();
 
@@ -49,6 +57,22 @@ internal static class RestoreSubset
             }
         }
         Console.WriteLine($"Copied {copiedFilesCount} file(s) to '{destinationFolder}'. {allFilesCount - copiedFilesCount} file(s) already exist in destination.");
+    }
+    private static IEnumerable<string> GetRootProjects(string projectOrSolution)
+    {
+        if (IsSolutionFile(projectOrSolution))
+        {
+            var solution = SolutionFile.Parse(projectOrSolution);
+            return solution.ProjectsInOrder
+                .Where(p => p.ProjectType != SolutionProjectType.SolutionFolder)
+                .Select(p => p.AbsolutePath);
+        }
+        return new[] { projectOrSolution };
+    }
+
+    private static bool IsSolutionFile(string projectOrSolution)
+    {
+        return ".sln".Equals(Path.GetExtension(projectOrSolution), StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsSameOrUnder(string rootFolder, string path)
