@@ -54,8 +54,9 @@ dotnet subset restore /source/complexapp.sln --root-directory /source/ --output 
 
 ## dotnet-subset + docker
 Please check these pull requests to see how to use `dotnet-subset` in your `Dockerfile`:
-- https://github.com/othmane-kinane-nw/modular-monolith-with-ddd/pull/1/files?diff=split&w=0
-- https://github.com/othmane-kinane-nw/dotnet-docker/pull/1/files?diff=split&w=0
+- https://github.com/othmane-kinane-nw/eShopOnContainers/pull/1/files?diff=unified&w=0
+- https://github.com/othmane-kinane-nw/modular-monolith-with-ddd/pull/1/files?diff=unified&w=0
+- https://github.com/othmane-kinane-nw/dotnet-docker/pull/1/files?diff=unified&w=0
 
 ## Roadmap
 - [ ] Add tests
