@@ -1,48 +1,34 @@
-using Microsoft.Build.Construction;
+﻿using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
-namespace Nimbleways.Tools.Subset;
-internal static class RestoreSubset
+namespace Nimbleways.Tools.Subset.Commands;
+
+internal abstract class SubsetCommandBase
 {
-    public static void Execute(string projectOrSolution, string rootFolder, string destinationFolder)
+    public void Execute(string projectOrSolution, string rootFolder, string destinationFolder)
     {
         if (!IsSameOrUnder(rootFolder, projectOrSolution))
         {
             throw new ArgumentException($"Project or solution '${projectOrSolution}' must be under the root folder '{rootFolder}'");
         }
+
         Directory.CreateDirectory(destinationFolder);
 
-        using var projectCollection = new ProjectCollection();
-        var projectsByFullPath = new Dictionary<string, Project>();
-        foreach (var project in GetRootProjects(projectOrSolution))
-        {
-            VisitAllProjects(projectCollection, rootFolder, project, projectsByFullPath);
-        }
-        var projectListAsString = string.Join(Environment.NewLine + " - ", projectsByFullPath.Keys.OrderBy(f => f));
-        Console.WriteLine($"Found {projectsByFullPath.Count} project(s) to copy:{Environment.NewLine + " - "}{projectListAsString}");
-        var nugetConfigFiles = GetNugetConfigFiles(rootFolder, projectsByFullPath);
-        var extraFilesInvolvedInRestore = projectsByFullPath.Values
-            .SelectMany(project => GetExtraFilesInvolvedInRestore(rootFolder, project))
-            .Concat(nugetConfigFiles)
-            .Distinct()
-            .ToList();
-        if (IsSolutionFile(projectOrSolution))
-        {
-            extraFilesInvolvedInRestore.Add(projectOrSolution);
-        }
-        if (extraFilesInvolvedInRestore.Count > 0)
-        {
-            var extraFilesInvolvedInRestoreAsString = string.Join(Environment.NewLine + " - ", extraFilesInvolvedInRestore.OrderBy(f => f));
-            Console.WriteLine($"Found {extraFilesInvolvedInRestore.Count} extra file(s) to copy:{Environment.NewLine + " - "}{extraFilesInvolvedInRestoreAsString}");
-        }
-        var allFilesToCopy = projectsByFullPath.Keys.Concat(extraFilesInvolvedInRestore).Distinct();
+        IEnumerable<string> allFilesToCopy = GetFilesToCopy(projectOrSolution, rootFolder);
 
+        CopyFiles(rootFolder, destinationFolder, allFilesToCopy);
+    }
+
+    protected abstract IEnumerable<string> GetFilesToCopy(string projectOrSolution, string rootFolder);
+
+    private static void CopyFiles(string rootFolder, string destinationFolder, IEnumerable<string> allFilesToCopy)
+    {
         int allFilesCount = 0;
         int copiedFilesCount = 0;
-        foreach (var file in allFilesToCopy)
+        foreach (string? file in allFilesToCopy)
         {
             ++allFilesCount;
-            var destinationFile = Path.Combine(destinationFolder, Path.GetRelativePath(rootFolder, file));
+            string? destinationFile = Path.Combine(destinationFolder, Path.GetRelativePath(rootFolder, file));
             Directory.CreateDirectory(Path.GetDirectoryName(destinationFile)!);
             if (!File.Exists(destinationFile))
             {
@@ -51,79 +37,90 @@ internal static class RestoreSubset
             }
             else if (!AreFilesIdentical(file, destinationFile))
             {
-                string errorMessage = $"ERROR: cannot copy '{file}' to '{destinationFile}': destination file already exist but have different content from source file";
+                string errorMessage =
+                    $"ERROR: cannot copy '{file}' to '{destinationFile}': destination file already exist but have different content from source file";
                 Console.WriteLine(errorMessage);
                 throw new ArgumentException(errorMessage);
             }
         }
+
         Console.WriteLine($"Copied {copiedFilesCount} file(s) to '{destinationFolder}'. {allFilesCount - copiedFilesCount} file(s) already exist in destination.");
     }
-    private static IEnumerable<string> GetRootProjects(string projectOrSolution)
+
+    protected static IEnumerable<string> GetRootProjects(string projectOrSolution)
     {
         if (IsSolutionFile(projectOrSolution))
         {
-            var solution = SolutionFile.Parse(projectOrSolution);
+            SolutionFile? solution = SolutionFile.Parse(projectOrSolution);
             return solution.ProjectsInOrder
                 .Where(p => p.ProjectType != SolutionProjectType.SolutionFolder)
                 .Select(p => p.AbsolutePath);
         }
-        return new[] { projectOrSolution };
+
+        return new[]
+        {
+            projectOrSolution
+        };
     }
 
-    private static bool IsSolutionFile(string projectOrSolution)
+    protected static bool IsSolutionFile(string projectOrSolution)
     {
         return ".sln".Equals(Path.GetExtension(projectOrSolution), StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsSameOrUnder(string rootFolder, string path)
     {
-        var relativePath = Path.GetRelativePath(rootFolder, path);
+        string? relativePath = Path.GetRelativePath(rootFolder, path);
         return relativePath != ".." && !relativePath.StartsWith(".." + Path.DirectorySeparatorChar, StringComparison.Ordinal) && !Path.IsPathRooted(relativePath);
     }
 
     private static string GetFullPathWithOriginalCase(string path, string? basePath = null)
     {
-        var fullFilePath = basePath != null ? Path.GetFullPath(path, basePath) : Path.GetFullPath(path);
+        string? fullFilePath = basePath != null ? Path.GetFullPath(path, basePath) : Path.GetFullPath(path);
         if (!File.Exists(fullFilePath))
         {
             return fullFilePath;
         }
 
-        var folder = Path.GetDirectoryName(fullFilePath) ?? throw new ArgumentException("GetDirectoryName returns null", nameof(path));
+        string folder = Path.GetDirectoryName(fullFilePath) ?? throw new ArgumentException("GetDirectoryName returns null", nameof(path));
         return Directory.EnumerateFiles(folder, Path.GetFileName(fullFilePath)).First();
     }
 
-    private static void VisitAllProjects(ProjectCollection projectCollection, string rootFolder, string projectPath, Dictionary<string, Project> projects)
+    protected void VisitAllProjects(ProjectCollection projectCollection, string rootFolder, string projectPath, Dictionary<string, Project> projects)
     {
         if (!Path.IsPathRooted(projectPath))
         {
             throw new ArgumentException($"projectPath must be absolute: '{projectPath}");
         }
-        var fullPath = GetFullPathWithOriginalCase(projectPath);
+
+        string fullPath = GetFullPathWithOriginalCase(projectPath);
         if (projects.ContainsKey(fullPath) || !IsSameOrUnder(rootFolder, fullPath))
         {
             return;
         }
 
-        var project = projectCollection.LoadProject(fullPath);
+        Project project = projectCollection.LoadProject(fullPath);
         projects.Add(fullPath, project);
-        var r = project.GetItems("ProjectReference");
-        foreach (var projectReference in r)
+        ICollection<ProjectItem>? r = project.GetItems("ProjectReference");
+        foreach (ProjectItem? projectReference in r)
         {
-            var path = Path.IsPathRooted(projectReference.EvaluatedInclude) ? projectReference.EvaluatedInclude : Path.Combine(Path.GetDirectoryName(fullPath)!, projectReference.EvaluatedInclude);
+            string? path = Path.IsPathRooted(projectReference.EvaluatedInclude)
+                ? projectReference.EvaluatedInclude
+                : Path.Combine(Path.GetDirectoryName(fullPath)!, projectReference.EvaluatedInclude);
             VisitAllProjects(projectCollection, rootFolder, path, projects);
         }
     }
 
     private static string? GetPackagesLockFile(string projectFolder, Project project)
     {
-        var candidateFilenames = new List<string>();
-        var nuGetLockFilePathPropertyValue = project.GetPropertyValue("NuGetLockFilePath");
+        List<string> candidateFilenames = new();
+        string? nuGetLockFilePathPropertyValue = project.GetPropertyValue("NuGetLockFilePath");
         if (!string.IsNullOrEmpty(nuGetLockFilePathPropertyValue))
         {
             candidateFilenames.Add(nuGetLockFilePathPropertyValue);
         }
-        var projectNameWithoutSpaces = Path
+
+        string? projectNameWithoutSpaces = Path
             .GetFileNameWithoutExtension(project.FullPath)
             .Replace(" ", "_", StringComparison.OrdinalIgnoreCase);
         candidateFilenames.Add($"packages.{projectNameWithoutSpaces}.lock.json");
@@ -132,21 +129,22 @@ internal static class RestoreSubset
             .Select(name => GetFullPathWithOriginalCase(name, projectFolder))
             .FirstOrDefault(File.Exists);
     }
-    private static IEnumerable<string> GetExtraFilesInvolvedInRestore(string rootFolder, Project project)
+
+    protected static IEnumerable<string> GetExtraFilesInvolvedInRestore(string rootFolder, Project project)
     {
-        var projectFolder = Path.GetDirectoryName(project.FullPath);
+        string? projectFolder = Path.GetDirectoryName(project.FullPath);
         if (projectFolder is null || !Directory.Exists(projectFolder))
         {
             throw new ArgumentException($"'{rootFolder}' doesn't exist");
         }
 
-        var packagesLockFile = GetPackagesLockFile(projectFolder, project);
+        string? packagesLockFile = GetPackagesLockFile(projectFolder, project);
         if (packagesLockFile is not null)
         {
             yield return packagesLockFile;
         }
 
-        foreach (var import in project.Imports)
+        foreach (ResolvedImport import in project.Imports)
         {
             if (IsSameOrUnder(rootFolder, import.ImportedProject.FullPath))
             {
@@ -154,16 +152,20 @@ internal static class RestoreSubset
             }
         }
     }
-    private static IEnumerable<string> GetNugetConfigFiles(string rootFolder, Dictionary<string, Project> projects)
+
+    protected static IEnumerable<string> GetNugetConfigFiles(string rootFolder, Dictionary<string, Project> projects)
     {
-        static void GetNugetConfigFiles(string rootFolder, DirectoryInfo folder, IDictionary<string, string> nugetConfigFiles)
+        void GetNugetConfigFiles(string rootFolder, DirectoryInfo folder, IDictionary<string, string> nugetConfigFiles)
         {
             if (nugetConfigFiles.ContainsKey(folder.FullName) || !IsSameOrUnder(rootFolder, folder.FullName))
             {
                 return;
             }
 
-            var f = new[] { "nuget.config", "NuGet.config", "NuGet.Config" }
+            string? f = new[]
+                {
+                    "nuget.config", "NuGet.config", "NuGet.Config"
+                }
                 .Select(name => GetFullPathWithOriginalCase(name, folder.FullName))
                 .FirstOrDefault(File.Exists);
             if (f is not null)
@@ -173,14 +175,15 @@ internal static class RestoreSubset
 
             GetNugetConfigFiles(rootFolder, folder.Parent!, nugetConfigFiles);
         }
-        var nugetConfigFilesByFolder = new Dictionary<string, string>();
-        var csprojDefinedNugetConfigFiles = new List<string>();
-        foreach (var (projectPath, project) in projects)
+
+        Dictionary<string, string> nugetConfigFilesByFolder = new();
+        List<string> csprojDefinedNugetConfigFiles = new();
+        foreach ((string? projectPath, Project? project) in projects)
         {
-            var restoreConfigFilePropertyValue = project.GetPropertyValue("RestoreConfigFile");
+            string? restoreConfigFilePropertyValue = project.GetPropertyValue("RestoreConfigFile");
             if (!string.IsNullOrEmpty(restoreConfigFilePropertyValue))
             {
-                var fullPath = GetFullPathWithOriginalCase(restoreConfigFilePropertyValue);
+                string fullPath = GetFullPathWithOriginalCase(restoreConfigFilePropertyValue);
                 if (IsSameOrUnder(rootFolder, fullPath))
                 {
                     if (File.Exists(fullPath))
@@ -189,8 +192,10 @@ internal static class RestoreSubset
                     }
                     else
                     {
-                        string errorMessage = $"ERROR: cannot find the file '{restoreConfigFilePropertyValue}' defined in the property 'RestoreConfigFile' of the project '{projectPath}'";
-                        errorMessage += $"{Environment.NewLine}If the path is relative, it is resolved by NuGet against the current working directy, not the project directory";
+                        string errorMessage =
+                            $"ERROR: cannot find the file '{restoreConfigFilePropertyValue}' defined in the property 'RestoreConfigFile' of the project '{projectPath}'";
+                        errorMessage +=
+                            $"{Environment.NewLine}If the path is relative, it is resolved by NuGet against the current working directy, not the project directory";
                         Console.WriteLine(errorMessage);
                         throw new ArgumentException(errorMessage);
                     }
@@ -201,8 +206,10 @@ internal static class RestoreSubset
                 GetNugetConfigFiles(rootFolder, Directory.GetParent(projectPath)!, nugetConfigFilesByFolder);
             }
         }
+
         return nugetConfigFilesByFolder.Values.Concat(csprojDefinedNugetConfigFiles);
     }
+
     private static bool AreFilesIdentical(string file1, string file2)
     {
         const int bytesToRead = 1024 * 10;
@@ -215,10 +222,10 @@ internal static class RestoreSubset
             return false;
         }
 
-        var buffer1 = new byte[bytesToRead];
-        var buffer2 = new byte[bytesToRead];
-        var buffer1ReadOnlySpan = (ReadOnlySpan<byte>)buffer1;
-        var buffer2ReadOnlySpan = (ReadOnlySpan<byte>)buffer2;
+        byte[] buffer1 = new byte[bytesToRead];
+        byte[] buffer2 = new byte[bytesToRead];
+        ReadOnlySpan<byte> buffer1ReadOnlySpan = (ReadOnlySpan<byte>)buffer1;
+        ReadOnlySpan<byte> buffer2ReadOnlySpan = (ReadOnlySpan<byte>)buffer2;
         int len1, len2;
         do
         {
