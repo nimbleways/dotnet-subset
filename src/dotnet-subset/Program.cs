@@ -5,7 +5,7 @@ using System.CommandLine;
 
 using Microsoft.Build.Locator;
 
-using Nimbleways.Tools.Subset;
+using Nimbleways.Tools.Subset.Commands;
 
 MSBuildLocator.RegisterDefaults();
 
@@ -25,15 +25,26 @@ var outputDirectoryOption = new Option<DirectoryInfo>(
 
 var rootCommand = new RootCommand(".NET Tool to copy a subset of files from a repository to a directory.");
 
-var readCommand = new Command("restore", "Create a subset for the restore operation.")
+var restoreCommand = new Command("restore", "Create a subset for the restore operation.")
             {
                 rootDirectoryOption,
                 outputDirectoryOption,
             };
-readCommand.AddArgument(projectOrSolutionArgument);
-rootCommand.AddCommand(readCommand);
+restoreCommand.AddArgument(projectOrSolutionArgument);
+rootCommand.AddCommand(restoreCommand);
 
-readCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => RestoreSubset.Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
+restoreCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => new RestoreSubset().Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
+    projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
+
+var copyCommand = new Command("copy", "Create subset of files, including all files of relevant projects")
+{
+    rootDirectoryOption,
+    outputDirectoryOption,
+};
+copyCommand.AddArgument(projectOrSolutionArgument);
+rootCommand.AddCommand(copyCommand);
+
+copyCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => new CopySubset().Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
     projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
 
 return rootCommand.Invoke(args);

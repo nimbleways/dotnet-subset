@@ -29,10 +29,15 @@ Prerequisite: .NET SDK 6
 Description:
   Create a subset for the restore operation.
 
+Commands
+  - `restore`: creates a subset of project files and related nuget configs only
+  - `copy`: creates a subset of all files from related projects and related imports 
+
 Usage:
-  dotnet-subset restore <projectOrSolution> [options]
+  dotnet-subset <command> <projectOrSolution> [options]
 
 Arguments:
+  <command>            `restore` or `copy`
   <projectOrSolution>  Project or solution to restore.
 
 Options:
