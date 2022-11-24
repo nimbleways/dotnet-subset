@@ -156,9 +156,9 @@ internal static class RestoreSubset
     }
     private static IEnumerable<string> GetNugetConfigFiles(string rootFolder, Dictionary<string, Project> projects)
     {
-        static void GetNugetConfigFiles(string rootFolder, DirectoryInfo folder, IDictionary<string, string> nugetConfigFiles)
+        static void GetNugetConfigFiles(string rootFolder, DirectoryInfo? folder, IDictionary<string, string> nugetConfigFiles)
         {
-            if (nugetConfigFiles.ContainsKey(folder.FullName) || !IsSameOrUnder(rootFolder, folder.FullName))
+            if (folder == null || nugetConfigFiles.ContainsKey(folder.FullName) || !IsSameOrUnder(rootFolder, folder.FullName))
             {
                 return;
             }
@@ -171,7 +171,7 @@ internal static class RestoreSubset
                 nugetConfigFiles.Add(folder.FullName, f);
             }
 
-            GetNugetConfigFiles(rootFolder, folder.Parent!, nugetConfigFiles);
+            GetNugetConfigFiles(rootFolder, folder.Parent, nugetConfigFiles);
         }
         var nugetConfigFilesByFolder = new Dictionary<string, string>();
         var csprojDefinedNugetConfigFiles = new List<string>();
@@ -198,7 +198,7 @@ internal static class RestoreSubset
             }
             else
             {
-                GetNugetConfigFiles(rootFolder, Directory.GetParent(projectPath)!, nugetConfigFilesByFolder);
+                GetNugetConfigFiles(rootFolder, Directory.GetParent(projectPath), nugetConfigFilesByFolder);
             }
         }
         return nugetConfigFilesByFolder.Values.Concat(csprojDefinedNugetConfigFiles);
