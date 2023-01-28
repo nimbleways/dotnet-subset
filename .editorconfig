@@ -380,3 +380,6 @@ dotnet_diagnostic.CA1062.severity = none
 [**/Program.cs]
 # CA1812: Avoid uninstantiated internal classes
 dotnet_diagnostic.CA1812.severity = none
+
+# CA1852: Seal internal types
+dotnet_diagnostic.CA1852.severity = none
