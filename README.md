@@ -25,12 +25,12 @@ To learn more about the motivation behind `dotnet-subset`, please read [the rela
 dotnet tool install --global dotnet-subset
 ```
 ### From source
-Prerequisite: .NET SDK 6
+Prerequisite: .NET SDK 2.1 or newer
 
 1. Clone this repository
 2. Open a terminal in the repository's root
-3. `dotnet pack --configuration Release`
-4. `dotnet tool install dotnet-subset --global --add-source ./artifacts/Release/nupkg/dotnet-subset/`
+3. `dotnet pack --configuration Release --version-suffix local`
+4. `dotnet tool update dotnet-subset --global --prerelease --add-source ./artifacts/Release/nupkg/dotnet-subset/`
 
 ## Usage
 ```
