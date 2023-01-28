@@ -7,6 +7,8 @@ using Microsoft.Build.Locator;
 
 using Nimbleways.Tools.Subset;
 
+Helpers.PrintContext();
+
 MSBuildLocator.RegisterDefaults();
 
 var projectOrSolutionArgument = new Argument<FileInfo>(
