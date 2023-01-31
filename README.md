@@ -13,7 +13,7 @@ To learn more about the motivation behind `dotnet-subset`, please read [the rela
 
 ## Features
 * Supports a single project or a solution file as input.
-* Copies all the required files for the root projects, including their project dependencies transitiverly.
+* Copies all the required files for the root projects, including their project dependencies transitively.
 * Copies imported MSBuild files, including [Directory.Build.props and Directory.Build.targets](https://learn.microsoft.com/en-us/visualstudio/msbuild/customize-your-build?view=vs-2022#directorybuildprops-and-directorybuildtargets).
 * For each required project, copies all NuGet configuration files involved in computing its effective NuGet settings. See [How NuGet settings are applied](https://learn.microsoft.com/en-us/nuget/consume-packages/configuring-nuget-behavior#how-settings-are-applied). `dotnet-subset` also supports [custom NuGet configuration filepath](https://learn.microsoft.com/en-us/nuget/reference/msbuild-targets#examples) defined in the project's csproj.
 * For each required project, copies the NuGet lock file and support the `NuGetLockFilePath` property. See `https://learn.microsoft.com/en-us/nuget/consume-packages/package-references-in-project-files#lock-file-extensibility`.
