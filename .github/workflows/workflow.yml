@@ -11,13 +11,13 @@ env:
   Configuration: "Release"
 
 jobs:
-  build_test:
-    name: Build and test
+  build_unittest:
+    name: Build and unit test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
     - name: Restore dependencies
@@ -27,7 +27,7 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --filter FullyQualifiedName!~FunctionalTests
     - name: Pack
       run: dotnet pack --no-build --verbosity normal
     - name: Upload nupkg artifact
@@ -35,5 +35,33 @@ jobs:
       with:
         name: dotnet-subset-nupkg-artifact
         retention-days: "15"
+        if-no-files-found: error
         path: |
-          artifacts/**/*.nupkg
+          artifacts/Release/nupkg/dotnet-subset/dotnet-subset.*.nupkg
+
+  functional_tests:
+    name: Run functional test
+    needs: [build_unittest]
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        dotnet: [ '6.0.x' ]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: ${{ matrix.dotnet }}
+    - name: dotnet --info
+      run:  dotnet --info
+    - uses: actions/download-artifact@v3
+      with:
+        name: dotnet-subset-nupkg-artifact
+        path: artifacts/Release/nupkg/dotnet-subset
+    - name: Install dotnet-subset
+      run:  dotnet tool install dotnet-subset --global --add-source ./artifacts/Release/nupkg/dotnet-subset/
+    - name: Show dotnet-subset version
+      run: dotnet subset --version
+    - name: Functional Tests
+      run: dotnet test --no-build --verbosity normal --filter FullyQualifiedName~FunctionalTests
