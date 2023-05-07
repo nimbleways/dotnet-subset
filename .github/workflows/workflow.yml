@@ -23,7 +23,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Check format
-      run: dotnet format --no-restore --verify-no-changes --verbosity detailed
+      run: dotnet format whitespace --no-restore --verify-no-changes --verbosity detailed && dotnet format style --no-restore --verify-no-changes --verbosity n
     - name: Build
       run: dotnet build --no-restore
     - name: Test
