@@ -7,6 +7,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{5B4A3711-7BF
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-subset", "src\dotnet-subset\dotnet-subset.csproj", "{4995C2BA-2570-4011-8C85-008462A147D1}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{77426E3F-D19B-49C1-A012-12F3C549455D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "dotnet-subset.FunctionalTests", "test\dotnet-subset.FunctionalTests\dotnet-subset.FunctionalTests.csproj", "{120A48B4-1065-43F6-95AA-620F4B1BA392}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,8 +24,13 @@ Global
 		{4995C2BA-2570-4011-8C85-008462A147D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4995C2BA-2570-4011-8C85-008462A147D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4995C2BA-2570-4011-8C85-008462A147D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{120A48B4-1065-43F6-95AA-620F4B1BA392}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{120A48B4-1065-43F6-95AA-620F4B1BA392}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{120A48B4-1065-43F6-95AA-620F4B1BA392}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{120A48B4-1065-43F6-95AA-620F4B1BA392}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4995C2BA-2570-4011-8C85-008462A147D1} = {5B4A3711-7BFF-4F07-AABD-3EEC9AB94A77}
+		{120A48B4-1065-43F6-95AA-620F4B1BA392} = {77426E3F-D19B-49C1-A012-12F3C549455D}
 	EndGlobalSection
 EndGlobal
