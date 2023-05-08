@@ -9,6 +9,9 @@ on:
 env:
   SourceRevisionId: ${{ github.sha }}
   Configuration: "Release"
+  DOTNET_INSTALL_DIR: .temp/dotnet
+  DOTNET_ROOT: .temp/dotnet
+
 
 jobs:
   build_unittest:
@@ -44,8 +47,8 @@ jobs:
     needs: [build_unittest]
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        dotnet: [ '6.0.x' ]
+        os: [windows-latest, ubuntu-latest, macos-latest]
+        dotnet: [ '6.0.x', '7.0.x' ]
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v3
@@ -60,7 +63,7 @@ jobs:
         name: dotnet-subset-nupkg-artifact
         path: artifacts/Release/nupkg/dotnet-subset
     - name: Install dotnet-subset
-      run:  dotnet tool install dotnet-subset --global --add-source ./artifacts/Release/nupkg/dotnet-subset/
+      run:  dotnet tool install dotnet-subset --global --verbosity normal --add-source ./artifacts/Release/nupkg/dotnet-subset/
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
