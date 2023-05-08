@@ -7,7 +7,7 @@ internal static class GuardExtensions
 {
     // ! Value is provided at compile-time
     [return: NotNull]
-    public static T AsNotNull<T>(this T? obj, [CallerArgumentExpression(nameof(obj))] string expression = null!)
+    public static T AsNotNull<T>(this T? obj, [CallerArgumentExpression("obj")] string expression = null!)
         where T : class?
     {
         return obj is null ? throw new UnexpectedNullExpressionException(expression) : obj;
