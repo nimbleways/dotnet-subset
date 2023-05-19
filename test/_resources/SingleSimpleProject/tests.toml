@@ -1,0 +1,3 @@
+[[restore]]
+test_name="project_without_dependency"
+project_or_solution="SimpleProject.csproj"

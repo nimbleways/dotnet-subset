@@ -374,6 +374,9 @@ dotnet_diagnostic.IDE0058.severity = none
 # CA1062: Validate arguments of public methods
 dotnet_diagnostic.CA1062.severity = none
 
+# IDE0280: Use 'nameof'
+dotnet_diagnostic.IDE0280.severity = none
+
 
 #### Custom config for entrypoint projects ####
 

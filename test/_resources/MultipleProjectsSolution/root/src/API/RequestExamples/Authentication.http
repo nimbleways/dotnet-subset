@@ -1,0 +1,13 @@
+﻿### Authenticate Member
+POST {{baseUrl}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&username=testMember@mail.com&password=testMemberPass&client_id=ro.client&client_secret=secret
+
+### Authenticate Admin
+POST {{baseUrl}}/connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type=password&username=testAdmin@mail.com&password=testAdminPass&client_id=ro.client&client_secret=secret
+
+

@@ -1,0 +1,8 @@
+<Project Sdk="MSBuild.Sdk.SqlProj/1.6.1">
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <Content Include="..\CompanyName.MyMeetings.Database\Structure\**\*.sql" />
+    </ItemGroup>
+</Project>

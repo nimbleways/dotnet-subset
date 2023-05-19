@@ -190,7 +190,7 @@ internal static class RestoreSubset
                     else
                     {
                         string errorMessage = $"ERROR: cannot find the file '{restoreConfigFilePropertyValue}' defined in the property 'RestoreConfigFile' of the project '{projectPath}'";
-                        errorMessage += $"{Environment.NewLine}If the path is relative, it is resolved by NuGet against the current working directy, not the project directory";
+                        errorMessage += $"{Environment.NewLine}If the path is relative, it is resolved by NuGet against the current working directly, not the project directory";
                         Console.WriteLine(errorMessage);
                         throw new ArgumentException(errorMessage);
                     }

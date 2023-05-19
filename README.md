@@ -71,11 +71,10 @@ Please check these pull requests to see how to use `dotnet-subset` in your `Dock
 - https://github.com/othmane-kinane-nw/dotnet-docker/pull/1/files?diff=unified&w=0
 
 ## Roadmap
-- [ ] Add tests
-- [ ] Automate the versionning
-- [ ] Automate the deployment to NuGet
+- [x] Add tests
 - [ ] Refactor the codebase
 - [ ] Add "build" algorithm
+- [ ] Automate the deployment to NuGet
 
 ## License
 

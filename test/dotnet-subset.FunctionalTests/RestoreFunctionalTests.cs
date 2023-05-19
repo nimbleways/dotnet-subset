@@ -1,46 +1,98 @@
-using System.Diagnostics;
+using Nimbleways.Tools.Subset.Helpers;
+using Nimbleways.Tools.Subset.Models;
+using Nimbleways.Tools.Subset.Utils;
 
 namespace Nimbleways.Tools.Subset;
 
-public class RestoreFunctionalTests
+public class RestoreFunctionalTests : IDisposable
 {
+    private static readonly IReadOnlyCollection<TestDescriptor> TestDescriptors = TestHelpers.GetTestDescriptors();
+    private readonly DisposableTempDirectory _tempDirectory = new();
+    private bool _disposedValue;
+
+    private DirectoryInfo OutputDirectory => _tempDirectory.Value;
     public static IEnumerable<object[]> GetRestoreTestDescriptors()
     {
-        return TestUtils.GetTestDescriptors().OfType<RestoreTestDescriptor>().Select(rtd => new object[] { rtd });
+        object[][] objects = TestDescriptors.OfType<RestoreTestDescriptor>().Select(rtd => new object[] { rtd }).ToArray();
+        return objects;
     }
 
     [Theory]
     [MemberData(nameof(GetRestoreTestDescriptors))]
     public void RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
     {
-        DirectoryInfo outputDirectory = Run(restoreTestDescriptor);
-        Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, outputDirectory));
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
-    private static DirectoryInfo Run(RestoreTestDescriptor restoreTestDescriptor)
+    [Fact]
+    public void CanRunTwiceWithSameArguments()
     {
-        string projectOrSolution = Path.Combine(restoreTestDescriptor.SampleDirectory.FullName, "root", restoreTestDescriptor.CommandInputs.ProjectOrSolution);
-        var output = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), Path.GetRandomFileName()));
-        string root = Path.Combine(restoreTestDescriptor.SampleDirectory.FullName, "root");
+        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+    }
 
-        using Process process = new();
+    [Fact]
+    public void FailsIfOutputContainsANonIdenticalFile()
+    {
+        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        IncrementFileLastByteValue(fileInOutput);
+        Assert.Throws<InvalidOperationException>(() => DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory));
+    }
 
-        // Configure the process
-        process.StartInfo.FileName = "dotnet";
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.RedirectStandardOutput = true;
-        process.StartInfo.RedirectStandardError = true;
-        process.StartInfo.CreateNoWindow = true;
-        process.StartInfo.Arguments = $@"subset restore ""{projectOrSolution}"" --output ""{output.FullName}"" --root-directory ""{root}""";
+    [Fact]
+    public void CopyMissingFilesInOutput()
+    {
+        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        DeleteHalfTheFiles(OutputDirectory);
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+    }
 
-        // Start the process
-        process.Start();
+    private static void DeleteHalfTheFiles(DirectoryInfo directory)
+    {
+        var outputFiles = directory.EnumerateFiles("*", SearchOption.AllDirectories).ToArray();
+        if (outputFiles.Length < 2)
+        {
+            throw new InvalidOperationException();
+        }
 
-        // Wait for the process to exit
-        process.WaitForExit();
+        foreach (var file in outputFiles.Take(outputFiles.Length / 2))
+        {
+            file.Delete();
+        }
+    }
 
-        return process.ExitCode == 0 ?
-            output
-            : throw new InvalidOperationException($"process.ExitCode=={process.ExitCode}. Expected 0.");
+    private static void IncrementFileLastByteValue(FileInfo fileInOutput)
+    {
+        using var fileStream = fileInOutput.Open(FileMode.Open, FileAccess.ReadWrite);
+        fileStream.Position = fileInOutput.Length - 1;
+        var lastByte = fileStream.ReadByte();
+        fileStream.Position = fileInOutput.Length - 1;
+        byte incrementedByte = (byte)(lastByte == byte.MaxValue ? 0 : lastByte + 1);
+        fileStream.WriteByte(incrementedByte);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            if (disposing)
+            {
+                _tempDirectory.Dispose();
+            }
+            _disposedValue = true;
+        }
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }

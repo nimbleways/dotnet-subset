@@ -1,0 +1,162 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <Name>CompanyName.MyMeetings.Database</Name>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectVersion>4.1</ProjectVersion>
+    <ProjectGuid>{43dbbb02-ca43-42ad-be21-04ac867ba168}</ProjectGuid>
+    <DSP>Microsoft.Data.Tools.Schema.Sql.Sql130DatabaseSchemaProvider</DSP>
+    <OutputType>Database</OutputType>
+    <RootPath>
+    </RootPath>
+    <RootNamespace>CompanyName.MyMeetings.Database</RootNamespace>
+    <AssemblyName>CompanyName.MyMeetings.Database</AssemblyName>
+    <ModelCollation>1033, CI</ModelCollation>
+    <DefaultFileStructure>BySchemaAndSchemaType</DefaultFileStructure>
+    <DeployToDatabase>True</DeployToDatabase>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetLanguage>CS</TargetLanguage>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <SqlServerVerification>False</SqlServerVerification>
+    <IncludeCompositeObjects>True</IncludeCompositeObjects>
+    <TargetDatabaseSet>True</TargetDatabaseSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>bin\Debug\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineDebug>true</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
+    <!-- Default to the v11.0 targets path if the targets file for the current VS version is not found -->
+    <SSDTExists Condition="Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets')">True</SSDTExists>
+    <VisualStudioVersion Condition="'$(SSDTExists)' == ''">11.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Production|AnyCPU' ">
+    <OutputPath>bin\Release\</OutputPath>
+    <BuildScriptName>$(MSBuildProjectName).sql</BuildScriptName>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineDebug>false</DefineDebug>
+    <DefineTrace>true</DefineTrace>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <Import Condition="'$(SQLDBExtensionsRefPath)' != ''" Project="$(SQLDBExtensionsRefPath)\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <Import Condition="'$(SQLDBExtensionsRefPath)' == ''" Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\SSDT\Microsoft.Data.Tools.Schema.SqlTasks.targets" />
+  <ItemGroup>
+    <Folder Include="Properties" />
+    <Folder Include="Structure" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\Migrations" />
+    <Folder Include="Scripts\Seeds" />
+    <Folder Include="Scripts\Migrations\1_0_0_0\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Build Include="Structure\administration\Tables\InboxMessages.sql" />
+    <Build Include="Structure\administration\Tables\InternalCommands.sql" />
+    <Build Include="Structure\administration\Tables\MeetingGroupProposals.sql" />
+    <Build Include="Structure\administration\Tables\Members.sql" />
+    <Build Include="Structure\administration\Tables\OutboxMessages.sql" />
+    <Build Include="Structure\administration\Views\v_MeetingGroupProposals.sql" />
+    <Build Include="Structure\administration\Views\v_Members.sql" />
+    <Build Include="Structure\app\Tables\Emails.sql" />
+    <Build Include="Structure\app\Tables\MigrationsJournal.sql" />
+    <Build Include="Structure\meetings\Tables\Countries.sql" />
+    <Build Include="Structure\meetings\Tables\InboxMessages.sql" />
+    <Build Include="Structure\meetings\Tables\InternalCommands.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingAttendees.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingCommentingConfigurations.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingComments.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingGroupMembers.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingGroupProposals.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingGroups.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingMemberCommentLikes.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingNotAttendees.sql" />
+    <Build Include="Structure\meetings\Tables\Meetings.sql" />
+    <Build Include="Structure\meetings\Tables\MeetingWaitlistMembers.sql" />
+    <Build Include="Structure\meetings\Tables\Members.sql" />
+    <Build Include="Structure\meetings\Tables\MemberSubscriptions.sql" />
+    <Build Include="Structure\meetings\Tables\OutboxMessages.sql" />
+    <Build Include="Structure\meetings\Views\v_Countries.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingAttendees.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingComments.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingDetails.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingGroupMembers.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingGroupProposals.sql" />
+    <Build Include="Structure\meetings\Views\v_MeetingGroups.sql" />
+    <Build Include="Structure\meetings\Views\v_Meetings.sql" />
+    <Build Include="Structure\meetings\Views\v_MemberMeetingGroups.sql" />
+    <Build Include="Structure\meetings\Views\v_MemberMeetings.sql" />
+    <Build Include="Structure\meetings\Views\v_Members.sql" />
+    <Build Include="Structure\payments\Tables\InboxMessages.sql" />
+    <Build Include="Structure\payments\Tables\InternalCommands.sql" />
+    <Build Include="Structure\payments\Tables\MeetingFees.sql" />
+    <Build Include="Structure\payments\Tables\Messages.sql" />
+    <Build Include="Structure\payments\Tables\OutboxMessages.sql" />
+    <Build Include="Structure\payments\Tables\Payers.sql" />
+    <Build Include="Structure\payments\Tables\PriceListItems.sql" />
+    <Build Include="Structure\payments\Tables\Streams.sql" />
+    <Build Include="Structure\payments\Tables\SubscriptionCheckpoints.sql" />
+    <Build Include="Structure\payments\Tables\SubscriptionDetails.sql" />
+    <Build Include="Structure\payments\Tables\SubscriptionPayments.sql" />
+    <Build Include="Structure\payments\Types\NewStreamMessages.sql" />
+    <Build Include="Structure\Security\Schemas.sql" />
+    <Build Include="Structure\users\Tables\InboxMessages.sql" />
+    <Build Include="Structure\users\Tables\InternalCommands.sql" />
+    <Build Include="Structure\users\Tables\OutboxMessages.sql" />
+    <Build Include="Structure\users\Tables\Permissions.sql" />
+    <Build Include="Structure\users\Tables\RolesToPermissions.sql" />
+    <Build Include="Structure\users\Tables\UserRegistrations.sql" />
+    <Build Include="Structure\users\Tables\UserRoles.sql" />
+    <Build Include="Structure\users\Tables\Users.sql" />
+    <Build Include="Structure\users\Views\v_UserPermissions.sql" />
+    <Build Include="Structure\users\Views\v_UserRegistrations.sql" />
+    <Build Include="Structure\users\Views\v_UserRoles.sql" />
+    <Build Include="Structure\users\Views\v_Users.sql" />
+    <None Include="Scripts\CreateStructure.sql" />
+    <None Include="Scripts\SeedDatabase.sql" />
+    <None Include="Scripts\CreateDatabase_Linux.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0001_initial_structure.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0002_change_meeting_comments_edit_date_type_and_add_meeting_comments_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0004_add_meeting_commenting_configurations_table.sql" />
+    <None Include="Scripts\CreateDatabase_Windows.sql" />
+    <None Include="Scripts\Seeds\0001_SeedCountries.sql">
+      <CopyToOutputDirectory>DoNotCopy</CopyToOutputDirectory>
+    </None>
+    <None Include="Scripts\Migrations\1_0_0_0\0003_add_meetings_countries_table.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0005_add_payer_id_to_subcription_details_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0006_add_member_meeting_groups_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0007_add_meeting_attendees_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0008_add_meeting_details_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0009_add_mock_emails_table.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0010_add_member_meetings_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0011_add_likes_count_to_meeting_comments_table.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0012_add_likes_count_to_meeting_comments_view.sql" />
+    <None Include="Scripts\Migrations\1_0_0_0\0013_add_meeting_member_comment_likes_table.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Scripts\ClearDatabase.sql" />
+  </ItemGroup>
+</Project>
