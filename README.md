@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="doc/dotnet-subset.png" alt="Image" />
+</p>
+
 # dotnet-subset
 [![NuGet version (dotnet-subset)](https://img.shields.io/nuget/v/dotnet-subset.svg?style=flat-square)](https://www.nuget.org/packages/dotnet-subset/)
 [![GitHub workflow](https://github.com/nimbleways/dotnet-subset/actions/workflows/workflow.yml/badge.svg?branch=main)](https://github.com/nimbleways/dotnet-subset/actions/workflows/workflow.yml?query=branch%3Amain)
