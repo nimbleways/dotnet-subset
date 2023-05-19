@@ -9,20 +9,23 @@ on:
 env:
   SourceRevisionId: ${{ github.sha }}
   Configuration: "Release"
-  DOTNET_INSTALL_DIR: .temp/dotnet
-  DOTNET_ROOT: .temp/dotnet
 
 
 jobs:
   build_unittest:
     name: Build and unit test
     runs-on: ubuntu-latest
+    env:
+      DOTNET_INSTALL_DIR: .temp/dotnet
+      DOTNET_ROOT: .temp/dotnet
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
+    - name: dotnet --info
+      run:  dotnet --info
     - name: Restore dependencies
       run: dotnet restore
     - name: Check format
@@ -40,7 +43,15 @@ jobs:
         retention-days: "15"
         if-no-files-found: error
         path: |
-          artifacts/Release/nupkg/dotnet-subset/dotnet-subset.*.nupkg
+          artifacts/${{ env.Configuration }}/nupkg/dotnet-subset/dotnet-subset.*.nupkg
+    - name: Upload tests artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: job-tests-artifact
+        retention-days: "1"
+        if-no-files-found: error
+        path: |
+          artifacts/${{ env.Configuration }}/bin/
 
   functional_tests:
     name: Run functional test
@@ -61,10 +72,16 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: dotnet-subset-nupkg-artifact
-        path: artifacts/Release/nupkg/dotnet-subset
+        path: artifacts/${{ env.Configuration }}/nupkg/dotnet-subset
+    - uses: actions/download-artifact@v3
+      with:
+        name: job-tests-artifact
+        path: artifacts/${{ env.Configuration }}
     - name: Install dotnet-subset
-      run:  dotnet tool install dotnet-subset --global --verbosity normal --add-source ./artifacts/Release/nupkg/dotnet-subset/
+      run:  dotnet tool install dotnet-subset --global --verbosity normal --add-source ./artifacts/${{ env.Configuration }}/nupkg/dotnet-subset/
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
-      run: dotnet test --no-build --verbosity normal --filter FullyQualifiedName~FunctionalTests
+      env:
+        CI_DOTNET_SUBSET_TEST_RESOURCES_DIR: ${{ github.workspace }}/test/_resources
+      run: dotnet test "artifacts\**\*Tests.dll" --verbosity normal --filter FullyQualifiedName~FunctionalTests

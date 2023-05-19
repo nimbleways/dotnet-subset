@@ -5,37 +5,46 @@ using System.CommandLine;
 
 using Microsoft.Build.Locator;
 
-using Nimbleways.Tools.Subset;
+namespace Nimbleways.Tools.Subset;
 
-Helpers.PrintContext();
+public static class Program
+{
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "<Pending>")]
+    private static VisualStudioInstance? s_visualStudioInstance;
 
-MSBuildLocator.RegisterDefaults();
+    public static int Main(string[] args)
+    {
+        Helpers.PrintContext();
 
-var projectOrSolutionArgument = new Argument<FileInfo>(
-    name: "projectOrSolution",
-    description: "Project or solution to restore.");
+        s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
 
-var rootDirectoryOption = new Option<DirectoryInfo>(
-    name: "--root-directory",
-    description: "Directory from where the files will be copied, usually the repository's root.")
-{ IsRequired = true };
+        var projectOrSolutionArgument = new Argument<FileInfo>(
+            name: "projectOrSolution",
+            description: "Project or solution to restore.");
 
-var outputDirectoryOption = new Option<DirectoryInfo>(
-    name: "--output",
-    description: "Directory where the subset files will be copied, preserving the original hierarchy.")
-{ IsRequired = true };
+        var rootDirectoryOption = new Option<DirectoryInfo>(
+            name: "--root-directory",
+            description: "Directory from where the files will be copied, usually the repository's root.")
+        { IsRequired = true };
 
-var rootCommand = new RootCommand(".NET Tool to copy a subset of files from a repository to a directory.");
+        var outputDirectoryOption = new Option<DirectoryInfo>(
+            name: "--output",
+            description: "Directory where the subset files will be copied, preserving the original hierarchy.")
+        { IsRequired = true };
 
-var readCommand = new Command("restore", "Create a subset for the restore operation.")
-            {
-                rootDirectoryOption,
-                outputDirectoryOption,
-            };
-readCommand.AddArgument(projectOrSolutionArgument);
-rootCommand.AddCommand(readCommand);
+        var rootCommand = new RootCommand(".NET Tool to copy a subset of files from a repository to a directory.");
 
-readCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => RestoreSubset.Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
-    projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
+        var readCommand = new Command("restore", "Create a subset for the restore operation.")
+        {
+            rootDirectoryOption,
+            outputDirectoryOption,
+        };
+        readCommand.AddArgument(projectOrSolutionArgument);
+        rootCommand.AddCommand(readCommand);
 
-return rootCommand.Invoke(args);
+        readCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => RestoreSubset.Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
+            projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
+
+        return rootCommand.Invoke(args);
+    }
+}
