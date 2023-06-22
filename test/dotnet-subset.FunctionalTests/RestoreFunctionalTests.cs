@@ -35,12 +35,25 @@ public class RestoreFunctionalTests : IDisposable
     }
 
     [Fact]
-    public void FailsIfOutputContainsANonIdenticalFile()
+    public void FailsIfOutputContainsANonIdenticalFileWithSameSize()
     {
         var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
         DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         IncrementFileLastByteValue(fileInOutput);
+        Assert.Throws<InvalidOperationException>(() => DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory));
+    }
+
+    [Fact]
+    public void FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
+    {
+        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
+        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        using (var streamWriter = File.AppendText(fileInOutput.FullName))
+        {
+            streamWriter.Write(Guid.NewGuid().ToByteArray());
+        }
         Assert.Throws<InvalidOperationException>(() => DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory));
     }
 
