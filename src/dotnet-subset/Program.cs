@@ -42,8 +42,7 @@ public static class Program
         readCommand.AddArgument(projectOrSolutionArgument);
         rootCommand.AddCommand(readCommand);
 
-        readCommand.SetHandler((projectOrSolution, rootDirectory, outputDirectory) => RestoreSubset.Execute(projectOrSolution.FullName, rootDirectory.FullName, outputDirectory.FullName),
-            projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
+        readCommand.SetHandler(RestoreSubset.Execute, projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
 
         return rootCommand.Invoke(args);
     }
