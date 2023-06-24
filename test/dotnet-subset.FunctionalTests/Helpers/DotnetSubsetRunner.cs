@@ -6,19 +6,19 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 internal static class DotnetSubsetRunner
 {
-    public static void Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static void AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    {
+        Assert.Equal(restoreTestDescriptor.ExitCode, Run(restoreTestDescriptor, output));
+    }
+    public static void AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    {
+        Assert.Equal(overriddenExpectedExitCode, Run(restoreTestDescriptor, output));
+    }
+
+    private static int Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
         string[] subsetArgs = GetSubsetArgs(restoreTestDescriptor, output);
         DirectoryInfo workingDirectory = restoreTestDescriptor.Root;
-        int exitCode = Run(subsetArgs, workingDirectory);
-        if (exitCode != 0)
-        {
-            throw new InvalidOperationException($"process.ExitCode=={exitCode}. Expected 0.");
-        }
-    }
-
-    private static int Run(string[] subsetArgs, DirectoryInfo workingDirectory)
-    {
         return IsRunningInCI()
             ? RunProcess(subsetArgs, workingDirectory)
             : RunMain(subsetArgs, workingDirectory);

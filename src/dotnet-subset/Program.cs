@@ -2,8 +2,13 @@
 // https://docs.microsoft.com/en-us/visualstudio/msbuild/updating-an-existing-application?view=vs-2022#use-microsoftbuildlocator
 
 using System.CommandLine;
+using System.CommandLine.Builder;
+using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 
 using Microsoft.Build.Locator;
+
+using Nimbleways.Tools.Subset.Exceptions;
 
 namespace Nimbleways.Tools.Subset;
 
@@ -18,6 +23,11 @@ public static class Program
 
         s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
 
+        return Run(args);
+    }
+
+    private static int Run(string[] args)
+    {
         var projectOrSolutionArgument = new Argument<FileInfo>(
             name: "projectOrSolution",
             description: "Project or solution to restore.");
@@ -44,6 +54,20 @@ public static class Program
 
         readCommand.SetHandler(RestoreSubset.Execute, projectOrSolutionArgument, rootDirectoryOption, outputDirectoryOption);
 
-        return rootCommand.Invoke(args);
+        var commandLineBuilder = new CommandLineBuilder(rootCommand);
+        commandLineBuilder.UseDefaults();
+        commandLineBuilder.UseExceptionHandler((Exception exception, InvocationContext context) =>
+        {
+            (int exitCode, string message) = exception switch
+            {
+                BaseException baseException => (baseException.ExitCode, "ERROR: " + baseException.Message),
+                _ => (255, exception.ToString()),
+            };
+
+            context.ExitCode = exitCode;
+            Console.Error.WriteLine(message);
+        });
+        var parser = commandLineBuilder.Build();
+        return parser.Invoke(args);
     }
 }
