@@ -377,6 +377,12 @@ dotnet_diagnostic.CA1062.severity = none
 # IDE0280: Use 'nameof'
 dotnet_diagnostic.IDE0280.severity = none
 
+# CA1032: Implement standard exception constructors
+dotnet_diagnostic.CA1032.severity = none
+
+# CA1707: Identifiers should not contain underscores
+dotnet_diagnostic.CA1707.severity = none
+
 
 #### Custom config for entrypoint projects ####
 

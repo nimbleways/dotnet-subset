@@ -102,7 +102,7 @@ internal static class TestHelpers
     private static IEnumerable<RestoreTestDescriptor> GetRestoreDescriptors(TomlTableArray tables, DirectoryInfo sampleDirectory)
     {
         return tables.Select(ToModel<RestoreTable>)
-            .Select(rt => new RestoreTestDescriptor(sampleDirectory, rt.TestName.AsNotNull(), new RestoreCommandInputs(rt.ProjectOrSolution.AsNotNull())));
+            .Select(rt => new RestoreTestDescriptor(sampleDirectory, rt.TestName.AsNotNull(), new RestoreCommandInputs(rt.ProjectOrSolution.AsNotNull()), rt.ExitCode ?? 0));
     }
 
     private static T ToModel<T>(TomlTable table) where T : class, new()

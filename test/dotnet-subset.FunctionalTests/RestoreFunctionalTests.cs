@@ -1,19 +1,26 @@
+using Nimbleways.Tools.Subset.Exceptions;
 using Nimbleways.Tools.Subset.Helpers;
 using Nimbleways.Tools.Subset.Models;
 using Nimbleways.Tools.Subset.Utils;
+
+using static Nimbleways.Tools.Subset.Helpers.DotnetSubsetRunner;
 
 namespace Nimbleways.Tools.Subset;
 
 public class RestoreFunctionalTests : IDisposable
 {
-    private static readonly IReadOnlyCollection<TestDescriptor> TestDescriptors = TestHelpers.GetTestDescriptors();
+    private static readonly IReadOnlyCollection<TestDescriptor> AllTestDescriptors = TestHelpers.GetTestDescriptors();
+
     private readonly DisposableTempDirectory _tempDirectory = new();
     private bool _disposedValue;
 
     private DirectoryInfo OutputDirectory => _tempDirectory.Value;
+
     public static IEnumerable<object[]> GetRestoreTestDescriptors()
     {
-        object[][] objects = TestDescriptors.OfType<RestoreTestDescriptor>().Select(rtd => new object[] { rtd }).ToArray();
+        object[][] objects = AllTestDescriptors
+            .OfType<RestoreTestDescriptor>()
+            .Select(rtd => new object[] { rtd }).ToArray();
         return objects;
     }
 
@@ -21,50 +28,59 @@ public class RestoreFunctionalTests : IDisposable
     [MemberData(nameof(GetRestoreTestDescriptors))]
     public void RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
     {
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
-        Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+        AssertRun(restoreTestDescriptor, OutputDirectory);
+        if (restoreTestDescriptor.ExitCode == 0)
+        {
+            Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+        }
     }
 
     [Fact]
     public void CanRunTwiceWithSameArguments()
     {
-        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        AssertRun(restoreTestDescriptor, OutputDirectory);
+        AssertRun(restoreTestDescriptor, OutputDirectory);
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
     [Fact]
     public void FailsIfOutputContainsANonIdenticalFileWithSameSize()
     {
-        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         IncrementFileLastByteValue(fileInOutput);
-        Assert.Throws<InvalidOperationException>(() => DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory));
+        AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
     }
 
     [Fact]
     public void FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
     {
-        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         using (var streamWriter = File.AppendText(fileInOutput.FullName))
         {
             streamWriter.Write(Guid.NewGuid().ToByteArray());
         }
-        Assert.Throws<InvalidOperationException>(() => DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory));
+
+        AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
     }
 
     [Fact]
     public void CopyMissingFilesInOutput()
     {
-        var restoreTestDescriptor = TestDescriptors.OfType<RestoreTestDescriptor>().First();
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        AssertRun(restoreTestDescriptor, OutputDirectory);
         DeleteHalfTheFiles(OutputDirectory);
-        DotnetSubsetRunner.Run(restoreTestDescriptor, OutputDirectory);
+        AssertRun(restoreTestDescriptor, OutputDirectory);
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+    }
+
+    private static RestoreTestDescriptor GetSuccessRestoreTestDescriptor()
+    {
+        return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.ExitCode == 0);
     }
 
     private static void DeleteHalfTheFiles(DirectoryInfo directory)

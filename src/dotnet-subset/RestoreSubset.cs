@@ -1,6 +1,8 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
+using Nimbleways.Tools.Subset.Exceptions;
+
 namespace Nimbleways.Tools.Subset;
 internal static class RestoreSubset
 {
@@ -8,7 +10,7 @@ internal static class RestoreSubset
     {
         if (!IsSameOrUnder(rootFolder, projectOrSolution))
         {
-            throw new ArgumentException($"Project or solution '${projectOrSolution}' must be under the root folder '{rootFolder}'");
+            throw new InvalidRootDirectoryException(projectOrSolution, rootFolder);
         }
         destinationFolder.Create();
 
@@ -54,9 +56,7 @@ internal static class RestoreSubset
             }
             else if (!AreFilesIdentical(file, destinationFile))
             {
-                string errorMessage = $"ERROR: cannot copy '{file}' to '{destinationFile}': destination file already exist but have different content from source file";
-                Console.WriteLine(errorMessage);
-                throw new ArgumentException(errorMessage);
+                throw new DestinationFileAlreadyExistsAndNotIdenticalException(file, destinationFile);
             }
         }
         Console.WriteLine($"Copied {copiedFilesCount} file(s) to '{destinationFolder.FullName}'. {allFilesCount - copiedFilesCount} file(s) already exist in destination.");
@@ -139,11 +139,6 @@ internal static class RestoreSubset
     private static IEnumerable<FileInfo> GetExtraFilesInvolvedInRestore(DirectoryInfo rootFolder, Project project)
     {
         var projectFolder = Path.GetDirectoryName(project.FullPath);
-        if (projectFolder is null || !Directory.Exists(projectFolder))
-        {
-            throw new ArgumentException($"'{rootFolder}' doesn't exist");
-        }
-
         var packagesLockFile = GetPackagesLockFile(new DirectoryInfo(projectFolder), project);
         if (packagesLockFile is not null)
         {
@@ -193,10 +188,7 @@ internal static class RestoreSubset
                     }
                     else
                     {
-                        string errorMessage = $"ERROR: cannot find the file '{restoreConfigFilePropertyValue}' defined in the property 'RestoreConfigFile' of the project '{projectPath}'";
-                        errorMessage += $"{Environment.NewLine}If the path is relative, it is resolved by NuGet against the current working directly, not the project directory";
-                        Console.WriteLine(errorMessage);
-                        throw new ArgumentException(errorMessage);
+                        throw new RestoreConfigFileNotFoundException(projectPath, restoreConfigFilePropertyValue);
                     }
                 }
             }
