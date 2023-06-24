@@ -1,0 +1,8 @@
+[[restore]]
+test_name="solution_with_imports"
+project_or_solution="Solution.sln"
+
+[[restore]]
+test_name="project_with_inexistant_RestoreConfigFile"
+project_or_solution="Project3/Project3.csproj"
+exit_code=20

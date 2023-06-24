@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Configurations>Debug;Release;Production</Configurations>
+    <RestoreConfigFile>$(MSBuildThisFileDirectory)../../../Tests/nuget.config</RestoreConfigFile>
   </PropertyGroup>
 
   <ItemGroup>

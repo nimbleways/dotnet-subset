@@ -29,17 +29,22 @@ internal static class DotnetSubsetRunner
         return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CI"));
     }
 
+    private static readonly object WorkingDirLock = new();
+
     private static int RunMain(string[] subsetArgs, DirectoryInfo workingDirectory)
     {
-        string previousCurrentDirectory = Environment.CurrentDirectory;
-        try
+        lock (WorkingDirLock)
         {
-            Environment.CurrentDirectory = workingDirectory.FullName;
-            return Program.Main(subsetArgs);
-        }
-        finally
-        {
-            Environment.CurrentDirectory = previousCurrentDirectory;
+            string previousCurrentDirectory = Environment.CurrentDirectory;
+            try
+            {
+                Environment.CurrentDirectory = workingDirectory.FullName;
+                return Program.Main(subsetArgs);
+            }
+            finally
+            {
+                Environment.CurrentDirectory = previousCurrentDirectory;
+            }
         }
     }
 
