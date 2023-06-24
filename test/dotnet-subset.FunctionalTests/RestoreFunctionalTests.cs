@@ -78,6 +78,31 @@ public class RestoreFunctionalTests : IDisposable
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
+    [Fact]
+    public void ReturnMinusOneForUnexpectedErrors()
+    {
+        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        AssertRun(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        using Stream _ = GetExclusiveReadStream(fileInOutput);
+        AssertRun(255, restoreTestDescriptor, OutputDirectory);
+    }
+
+    [Fact]
+    public void FailWhenProjectIsNotUnderRootDirectory()
+    {
+        var rootDir = new DirectoryInfo(Path.Combine(OutputDirectory.FullName, "SampleDir", "root"));
+        rootDir.Create();
+        var projectFile = new FileInfo(Path.Combine(OutputDirectory.FullName, "project.csproj"));
+        var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "test", new RestoreCommandInputs(projectFile.FullName));
+        AssertRun(InvalidRootDirectoryException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
+    }
+
+    private static FileStream GetExclusiveReadStream(FileInfo fileInOutput)
+    {
+        return fileInOutput.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+    }
+
     private static RestoreTestDescriptor GetSuccessRestoreTestDescriptor()
     {
         return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.ExitCode == 0);
