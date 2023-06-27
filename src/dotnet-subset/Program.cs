@@ -23,7 +23,9 @@ public static class Program
 
         s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
 
-        return Run(args);
+        int exitCode = Run(args);
+        Console.Error.WriteLine($"b. Exiting with code '{exitCode}'");
+        return exitCode;
     }
 
     private static int Run(string[] args)
@@ -66,6 +68,7 @@ public static class Program
 
             context.ExitCode = exitCode;
             Console.Error.WriteLine(message);
+            Console.Error.WriteLine($"a. Exiting with code '{exitCode}'");
         });
         var parser = commandLineBuilder.Build();
         return parser.Invoke(args);
