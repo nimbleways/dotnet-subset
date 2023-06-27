@@ -55,10 +55,7 @@ internal static class DotnetSubsetRunner
 
         // Configure the process
         process.StartInfo.FileName = "dotnet";
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.RedirectStandardOutput = false;
-        process.StartInfo.RedirectStandardError = false;
-        process.StartInfo.CreateNoWindow = false;
+        process.StartInfo.CreateNoWindow = true;
         process.StartInfo.WorkingDirectory = workingDirectory.FullName;
         process.StartInfo.Arguments = $@"subset {subsetArgsString}";
 
