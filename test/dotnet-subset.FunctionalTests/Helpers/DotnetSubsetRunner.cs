@@ -55,18 +55,22 @@ internal static class DotnetSubsetRunner
 
         // Configure the process
         process.StartInfo.FileName = "dotnet";
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.RedirectStandardOutput = false;
-        process.StartInfo.RedirectStandardError = false;
-        process.StartInfo.CreateNoWindow = false;
+        process.StartInfo.CreateNoWindow = true;
         process.StartInfo.WorkingDirectory = workingDirectory.FullName;
         process.StartInfo.Arguments = $@"subset {subsetArgsString}";
 
+        var id = Convert.ToBase64String(Guid.NewGuid().ToByteArray()).TrimEnd('=');
+
         // Start the process
+        Console.WriteLine();
+        Console.WriteLine($"#### {id} #### Starting a new process with command line: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
+        Console.WriteLine($"#### {id} #### WorkingDirectory: {process.StartInfo.WorkingDirectory} (Exists={Directory.Exists(process.StartInfo.WorkingDirectory)})");
         process.Start();
 
         // Wait for the process to exit
         process.WaitForExit();
+
+        Console.WriteLine($"#### {id} #### Process exited with code: {process.ExitCode}");
 
         return process.ExitCode;
     }
