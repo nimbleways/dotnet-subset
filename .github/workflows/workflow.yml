@@ -78,7 +78,7 @@ jobs:
         name: job-tests-artifact
         path: artifacts/${{ env.Configuration }}
     - name: Install dotnet-subset
-      run:  dotnet tool install dotnet-subset --global --verbosity normal --add-source ./artifacts/${{ env.Configuration }}/nupkg/dotnet-subset/
+      run:  dotnet tool install dotnet-subset --global --verbosity normal --prerelease --add-source ./artifacts/${{ env.Configuration }}/nupkg/dotnet-subset/
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
