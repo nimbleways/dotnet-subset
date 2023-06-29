@@ -38,7 +38,7 @@ public class RestoreFunctionalTests : IDisposable
     [Fact]
     public void CanRunTwiceWithSameArguments()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
         AssertRun(restoreTestDescriptor, OutputDirectory);
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
@@ -47,7 +47,7 @@ public class RestoreFunctionalTests : IDisposable
     [Fact]
     public void FailsIfOutputContainsANonIdenticalFileWithSameSize()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         IncrementFileLastByteValue(fileInOutput);
@@ -57,7 +57,7 @@ public class RestoreFunctionalTests : IDisposable
     [Fact]
     public void FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         using (var streamWriter = File.AppendText(fileInOutput.FullName))
@@ -71,7 +71,7 @@ public class RestoreFunctionalTests : IDisposable
     [Fact]
     public void CopyMissingFilesInOutput()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
         DeleteHalfTheFiles(OutputDirectory);
         AssertRun(restoreTestDescriptor, OutputDirectory);
@@ -81,7 +81,7 @@ public class RestoreFunctionalTests : IDisposable
     [Fact]
     public void ReturnMinusOneForUnexpectedErrors()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
         using Stream _ = GetExclusiveReadStream(fileInOutput);
@@ -103,9 +103,9 @@ public class RestoreFunctionalTests : IDisposable
         return fileInOutput.Open(FileMode.Open, FileAccess.Read, FileShare.None);
     }
 
-    private static RestoreTestDescriptor GetSuccessRestoreTestDescriptor()
+    private static RestoreTestDescriptor GetProjectWithOneDependencyRestoreTestDescriptor()
     {
-        return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.ExitCode == 0);
+        return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.TestName == "project_with_one_dependency");
     }
 
     private static void DeleteHalfTheFiles(DirectoryInfo directory)
