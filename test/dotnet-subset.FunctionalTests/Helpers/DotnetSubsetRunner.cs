@@ -6,16 +6,22 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 internal static class DotnetSubsetRunner
 {
-    public static void AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static string AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
-        Assert.Equal(restoreTestDescriptor.ExitCode, Run(restoreTestDescriptor, output));
+        ExecutionResult executionResult = Run(restoreTestDescriptor, output);
+        Assert.Equal(restoreTestDescriptor.ExitCode, executionResult.ExitCode);
+        return executionResult.ConsoleOutput;
     }
-    public static void AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static string AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
-        Assert.Equal(overriddenExpectedExitCode, Run(restoreTestDescriptor, output));
+        ExecutionResult executionResult = Run(restoreTestDescriptor, output);
+        Assert.Equal(overriddenExpectedExitCode, executionResult.ExitCode);
+        return executionResult.ConsoleOutput;
     }
 
-    private static int Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    private sealed record ExecutionResult(int ExitCode, string ConsoleOutput);
+
+    private static ExecutionResult Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
         string[] subsetArgs = GetSubsetArgs(restoreTestDescriptor, output);
         DirectoryInfo workingDirectory = restoreTestDescriptor.Root;
@@ -31,24 +37,30 @@ internal static class DotnetSubsetRunner
 
     private static readonly object WorkingDirLock = new();
 
-    private static int RunMain(string[] subsetArgs, DirectoryInfo workingDirectory)
+    private static ExecutionResult RunMain(string[] subsetArgs, DirectoryInfo workingDirectory)
     {
         lock (WorkingDirLock)
         {
+            using StringWriter writer = new();
+            (var originalOutTextWriter, var originalErrorTextWriter) = (Console.Out, Console.Error);
+            Console.SetOut(writer);
+            Console.SetError(writer);
             string previousCurrentDirectory = Environment.CurrentDirectory;
             try
             {
                 Environment.CurrentDirectory = workingDirectory.FullName;
-                return Program.Main(subsetArgs);
+                return new(Program.Main(subsetArgs), writer.ToString());
             }
             finally
             {
                 Environment.CurrentDirectory = previousCurrentDirectory;
+                Console.SetOut(originalOutTextWriter);
+                Console.SetError(originalErrorTextWriter);
             }
         }
     }
 
-    private static int RunProcess(IEnumerable<string> subsetArgs, DirectoryInfo workingDirectory)
+    private static ExecutionResult RunProcess(IEnumerable<string> subsetArgs, DirectoryInfo workingDirectory)
     {
         string subsetArgsString = string.Join(" ", subsetArgs.Select(a => $@"""{a}"""));
         using Process process = new();
@@ -68,7 +80,7 @@ internal static class DotnetSubsetRunner
         // Wait for the process to exit
         process.WaitForExit();
 
-        return process.ExitCode;
+        return new(process.ExitCode, string.Empty);
     }
 
     private static string[] GetSubsetArgs(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
