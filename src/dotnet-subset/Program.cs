@@ -16,20 +16,12 @@ public static class Program
     public static int Main(string[] args)
     {
         SetVisualStudionInstance();
-        Parser parser = CommandLineParser.GetCommandLineParser();
+        Parser parser = CommandLineParser.GetCommandLineParser(SetVisualStudionInstance);
         return parser.Invoke(args);
     }
 
     private static void SetVisualStudionInstance()
     {
-        try
-        {
-            s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
-        }
-        catch
-        {
-            Helpers.PrintContext();
-            throw;
-        }
+        s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
     }
 }
