@@ -27,7 +27,7 @@ internal static class CommandLineParser
             (int exitCode, string message) = exception switch
             {
                 BaseException baseException => (baseException.ExitCode, "ERROR: " + baseException.Message),
-                _ => (255, exception.ToString()),
+                _ => (255, "FATAL ERROR: " + exception.ToString()),
             };
 
             context.ExitCode = exitCode;

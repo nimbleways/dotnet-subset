@@ -1,0 +1,5 @@
+﻿Found 1 project(s) to copy:
+ - {SourceRootDirectory}/Project3/Project3.csproj
+
+ERROR: cannot find the file 'nuget.config' defined in the property 'RestoreConfigFile' of the project '{SourceRootDirectory}/Project3/Project3.csproj'
+If the path is relative, it is resolved by NuGet against the current working directly, not the project directory

@@ -1,0 +1,7 @@
+﻿Found 1 project(s) to copy:
+ - {SourceRootDirectory}/SimpleProject.csproj
+
+Found 1 extra file(s) to copy:
+ - {SourceRootDirectory}/packages.lock.json
+
+Copied 2 file(s) to '{OutputDirectory}'. 0 file(s) already exist in destination.

@@ -6,28 +6,27 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 internal static class DotnetSubsetRunner
 {
-    public static string AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static ExecutionResult AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
         ExecutionResult executionResult = Run(restoreTestDescriptor, output);
         Assert.Equal(restoreTestDescriptor.ExitCode, executionResult.ExitCode);
-        return executionResult.ConsoleOutput;
+        return executionResult;
     }
-    public static string AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static ExecutionResult AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
         ExecutionResult executionResult = Run(restoreTestDescriptor, output);
         Assert.Equal(overriddenExpectedExitCode, executionResult.ExitCode);
-        return executionResult.ConsoleOutput;
+        return executionResult;
     }
-
-    private sealed record ExecutionResult(int ExitCode, string ConsoleOutput);
 
     private static ExecutionResult Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
     {
         string[] subsetArgs = GetSubsetArgs(restoreTestDescriptor, output);
         DirectoryInfo workingDirectory = restoreTestDescriptor.Root;
-        return IsRunningInCI()
+        InternalResult result = IsRunningInCI()
             ? RunProcess(subsetArgs, workingDirectory)
             : RunMain(subsetArgs, workingDirectory);
+        return new ExecutionResult(restoreTestDescriptor, output, result.ExitCode, result.ConsoleOutput);
     }
 
     private static bool IsRunningInCI()
@@ -35,9 +34,12 @@ internal static class DotnetSubsetRunner
         return !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("CI"));
     }
 
+    private sealed record InternalResult(int ExitCode, string ConsoleOutput);
+
+
     private static readonly object WorkingDirLock = new();
 
-    private static ExecutionResult RunMain(string[] subsetArgs, DirectoryInfo workingDirectory)
+    private static InternalResult RunMain(string[] subsetArgs, DirectoryInfo workingDirectory)
     {
         lock (WorkingDirLock)
         {
@@ -60,7 +62,7 @@ internal static class DotnetSubsetRunner
         }
     }
 
-    private static ExecutionResult RunProcess(IEnumerable<string> subsetArgs, DirectoryInfo workingDirectory)
+    private static InternalResult RunProcess(IEnumerable<string> subsetArgs, DirectoryInfo workingDirectory)
     {
         string subsetArgsString = string.Join(" ", subsetArgs.Select(a => $@"""{a}"""));
         using Process process = new();
@@ -93,7 +95,8 @@ internal static class DotnetSubsetRunner
             "--output",
             output.FullName,
             "--root-directory",
-            restoreTestDescriptor.Root.FullName
+            restoreTestDescriptor.Root.FullName,
+            "--nologo"
         };
     }
 }

@@ -1,0 +1,1 @@
+﻿ERROR: The root folder '{SourceRootDirectory}' is not a parent of the project or solution '{OutputDirectory}/project.csproj'

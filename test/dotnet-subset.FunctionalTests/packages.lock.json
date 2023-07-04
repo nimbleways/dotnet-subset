@@ -24,6 +24,18 @@
         "resolved": "0.16.2",
         "contentHash": "NVvOlecYWwhqQdE461UGHUeJ1t2DtGXU+L00LgtBTgWA16bUmMhUIRaCpSkRX5HqAeid/KlXmdH7Sul0mr6HJA=="
       },
+      "Verify.Xunit": {
+        "type": "Direct",
+        "requested": "[20.4.0, )",
+        "resolved": "20.4.0",
+        "contentHash": "KmQWuG2I3YFOwnhwbI434IPlP0Vdn32of5n61q8bOckRwEm7ySzy+Ei9JOlI8vAWeqqY/1UtGLc1ZiCTT5HFBA==",
+        "dependencies": {
+          "EmptyFiles": "4.4.0",
+          "Verify": "20.4.0",
+          "xunit.abstractions": "2.0.3",
+          "xunit.extensibility.execution": "2.4.2"
+        }
+      },
       "xunit": {
         "type": "Direct",
         "requested": "[2.4.2, )",
@@ -40,6 +52,25 @@
         "requested": "[2.4.5, )",
         "resolved": "2.4.5",
         "contentHash": "OwHamvBdUKgqsXfBzWiCW/O98BTx81UKzx2bieIOQI7CZFE5NEQZGi8PBQGIKawDW96xeRffiNf20SjfC0x9hw=="
+      },
+      "Argon": {
+        "type": "Transitive",
+        "resolved": "0.7.2",
+        "contentHash": "6OsUiGsZzKx9BR15T4V+YDfpzFj8AQvtlw81VZm0LCOyu4OGqs4YFANTuhpdyb3N/qPcMomAt25zARo+zFtPmw=="
+      },
+      "DiffEngine": {
+        "type": "Transitive",
+        "resolved": "11.4.1",
+        "contentHash": "dp1r41w+d8ufEkr1Mul02sBFRk/mmAPLu20d8A00/5oU5S8gX6VUpgqZWBiwwZ7/onakyFMtOufUg8XPUFDhHw==",
+        "dependencies": {
+          "EmptyFiles": "4.4.0",
+          "System.Management": "6.0.1"
+        }
+      },
+      "EmptyFiles": {
+        "type": "Transitive",
+        "resolved": "4.4.0",
+        "contentHash": "gwJEfIGS7FhykvtZoscwXj/XwW+mJY6UbAZk+qtLKFUGWC95kfKXnj8VkxsZQnWBxJemM/q664rGLN5nf+OHZw=="
       },
       "Microsoft.Build": {
         "type": "Transitive",
@@ -383,6 +414,11 @@
         "resolved": "4.3.0",
         "contentHash": "VB5cn/7OzUfzdnC8tqAIMQciVLiq2epm2NrAm1E9OjNRyG4lVhfR61SMcLizejzQP8R8Uf/0l5qOIbUEi+RdEg=="
       },
+      "SimpleInfoName": {
+        "type": "Transitive",
+        "resolved": "2.1.1",
+        "contentHash": "0FkAdjkNjtEdSCt2/b6z5gd971bmTCXhRHqi8kH5Z/gV/XV/LmKeHrUmnBZffhPH91LUyaw3pzmQROTs4zNfGw=="
+      },
       "System.AppContext": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -405,8 +441,8 @@
       },
       "System.CodeDom": {
         "type": "Transitive",
-        "resolved": "4.4.0",
-        "contentHash": "2sCCb7doXEwtYAbqzbF/8UAeDRMNmPaQbU2q50Psg1J9KzumyVVCgKQY8s53WIPTufNT0DpSe9QRvVjOzfDWBA=="
+        "resolved": "6.0.0",
+        "contentHash": "CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA=="
       },
       "System.Collections": {
         "type": "Transitive",
@@ -637,6 +673,11 @@
           "System.Runtime": "4.3.0"
         }
       },
+      "System.IO.Hashing": {
+        "type": "Transitive",
+        "resolved": "7.0.0",
+        "contentHash": "sDnWM0N3AMCa86LrKTWeF3BZLD2sgWyYUc7HL6z4+xyDZNQRwzmxbo4qP2rX2MqC+Sy1/gOSRDah5ltxY5jPxw=="
+      },
       "System.Linq": {
         "type": "Transitive",
         "resolved": "4.3.0",
@@ -671,6 +712,14 @@
           "System.Runtime": "4.3.0",
           "System.Runtime.Extensions": "4.3.0",
           "System.Threading": "4.3.0"
+        }
+      },
+      "System.Management": {
+        "type": "Transitive",
+        "resolved": "6.0.1",
+        "contentHash": "10J1D0h/lioojphfJ4Fuh5ZUThT/xOVHdV9roGBittKKNP2PMjrvibEdbVTGZcPra1399Ja3tqIJLyQrc5Wmhg==",
+        "dependencies": {
+          "System.CodeDom": "6.0.0"
         }
       },
       "System.Memory": {
@@ -1235,6 +1284,18 @@
           "System.Text.Encoding": "4.3.0",
           "System.Threading": "4.3.0",
           "System.Xml.ReaderWriter": "4.3.0"
+        }
+      },
+      "Verify": {
+        "type": "Transitive",
+        "resolved": "20.4.0",
+        "contentHash": "gtZwE6ppNycNaCDozS9iMI6uY4jyZUK6yEaeyXqzNsF2aA0TcQRy5waIBoS3CHuuJDxVmYBRSkghkzH8S+1Fiw==",
+        "dependencies": {
+          "Argon": "0.7.2",
+          "DiffEngine": "11.4.1",
+          "EmptyFiles": "4.4.0",
+          "SimpleInfoName": "2.1.1",
+          "System.IO.Hashing": "7.0.0"
         }
       },
       "xunit.abstractions": {

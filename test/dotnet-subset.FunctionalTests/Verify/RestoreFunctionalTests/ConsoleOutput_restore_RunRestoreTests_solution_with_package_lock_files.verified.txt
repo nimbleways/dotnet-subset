@@ -1,0 +1,12 @@
+﻿Found 3 project(s) to copy:
+ - {SourceRootDirectory}/SimpleProjectA/SimpleProjectA.csproj
+ - {SourceRootDirectory}/SimpleProjectB/Simple Project B.csproj
+ - {SourceRootDirectory}/SimpleProjectC/SimpleProjectC.csproj
+
+Found 4 extra file(s) to copy:
+ - {SourceRootDirectory}/SimpleProjectA/CustomNamedPackageLock.json
+ - {SourceRootDirectory}/SimpleProjectB/packages.Simple_Project_B.lock.json
+ - {SourceRootDirectory}/SimpleProjectC/packages.lock.json
+ - {SourceRootDirectory}/Solution.sln
+
+Copied 7 file(s) to '{OutputDirectory}'. 0 file(s) already exist in destination.

@@ -1,0 +1,28 @@
+﻿Found 21 project(s) to copy:
+ - {SourceRootDirectory}/src/BuildingBlocks/Application/CompanyName.MyMeetings.BuildingBlocks.Application.csproj
+ - {SourceRootDirectory}/src/BuildingBlocks/Domain/CompanyName.MyMeetings.BuildingBlocks.Domain.csproj
+ - {SourceRootDirectory}/src/BuildingBlocks/EventBus/CompanyName.MyMeetings.BuildingBlocks.EventBus.csproj
+ - {SourceRootDirectory}/src/BuildingBlocks/Infrastructure/CompanyName.MyMeetings.BuildingBlocks.Infrastructure.csproj
+ - {SourceRootDirectory}/src/Modules/Administration/Application/CompanyName.MyMeetings.Modules.Administration.Application.csproj
+ - {SourceRootDirectory}/src/Modules/Administration/Domain/CompanyName.MyMeetings.Modules.Administration.Domain.csproj
+ - {SourceRootDirectory}/src/Modules/Administration/Infrastructure/CompanyName.MyMeetings.Modules.Administration.Infrastructure.csproj
+ - {SourceRootDirectory}/src/Modules/Administration/IntegrationEvents/CompanyName.MyMeetings.Modules.Administration.IntegrationEvents.csproj
+ - {SourceRootDirectory}/src/Modules/Meetings/Application/CompanyName.MyMeetings.Modules.Meetings.Application.csproj
+ - {SourceRootDirectory}/src/Modules/Meetings/Domain/CompanyName.MyMeetings.Modules.Meetings.Domain.csproj
+ - {SourceRootDirectory}/src/Modules/Meetings/Infrastructure/CompanyName.MyMeetings.Modules.Meetings.Infrastructure.csproj
+ - {SourceRootDirectory}/src/Modules/Meetings/IntegrationEvents/CompanyName.MyMeetings.Modules.Meetings.IntegrationEvents.csproj
+ - {SourceRootDirectory}/src/Modules/Payments/Application/CompanyName.MyMeetings.Modules.Payments.Application.csproj
+ - {SourceRootDirectory}/src/Modules/Payments/Domain/CompanyName.MyMeetings.Modules.Payments.Domain.csproj
+ - {SourceRootDirectory}/src/Modules/Payments/Infrastructure/CompanyName.MyMeetings.Modules.Payments.Infrastructure.csproj
+ - {SourceRootDirectory}/src/Modules/Payments/IntegrationEvents/CompanyName.MyMeetings.Modules.Payments.IntegrationEvents.csproj
+ - {SourceRootDirectory}/src/Modules/UserAccess/Application/CompanyName.MyMeetings.Modules.UserAccess.Application.csproj
+ - {SourceRootDirectory}/src/Modules/UserAccess/Domain/CompanyName.MyMeetings.Modules.UserAccess.Domain.csproj
+ - {SourceRootDirectory}/src/Modules/UserAccess/Infrastructure/CompanyName.MyMeetings.Modules.UserAccess.Infrastructure.csproj
+ - {SourceRootDirectory}/src/Modules/UserAccess/IntegrationEvents/CompanyName.MyMeetings.Modules.UserAccess.IntegrationEvents.csproj
+ - {SourceRootDirectory}/src/Tests/SUT/CompanyName.MyMeetings.SUT.csproj
+
+Found 2 extra file(s) to copy:
+ - {SourceRootDirectory}/src/Tests/nuget.config
+ - {SourceRootDirectory}/src/Tests/SUT/NuGet.Config
+
+Copied 23 file(s) to '{OutputDirectory}'. 0 file(s) already exist in destination.
