@@ -386,6 +386,9 @@ dotnet_diagnostic.CA1707.severity = none
 # CA2007: Do not directly await a Task
 dotnet_diagnostic.CA2007.severity = none
 
+# IDE0046: Use conditional expression for return
+dotnet_diagnostic.IDE0046.severity = suggestion
+
 
 #### Custom config for entrypoint projects ####
 

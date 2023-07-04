@@ -1,6 +1,5 @@
-using System.Diagnostics;
-
 using Nimbleways.Tools.Subset.Models;
+using Nimbleways.Tools.Subset.Utils.Processes;
 
 namespace Nimbleways.Tools.Subset.Helpers;
 
@@ -65,24 +64,17 @@ internal static class DotnetSubsetRunner
     private static InternalResult RunProcess(IEnumerable<string> subsetArgs, DirectoryInfo workingDirectory)
     {
         string subsetArgsString = string.Join(" ", subsetArgs.Select(a => $@"""{a}"""));
-        using Process process = new();
 
-        // Configure the process
-        process.StartInfo.FileName = "dotnet";
-        process.StartInfo.UseShellExecute = false;
-        process.StartInfo.RedirectStandardOutput = false;
-        process.StartInfo.RedirectStandardError = false;
-        process.StartInfo.CreateNoWindow = false;
-        process.StartInfo.WorkingDirectory = workingDirectory.FullName;
-        process.StartInfo.Arguments = $@"subset {subsetArgsString}";
+        using ProcessRunner processRunner = new(workingDirectory, "dotnet", $"subset {subsetArgsString}");
 
-        // Start the process
-        process.Start();
+        ProcessResult processResult = processRunner.Run(TimeSpan.FromSeconds(30));
 
-        // Wait for the process to exit
-        process.WaitForExit();
-
-        return new(process.ExitCode, string.Empty);
+        return processResult switch
+        {
+            ProcessExitedResult result => new(result.ExitCode, result.Output),
+            ProcessFailureResult { Exception: var exception } => throw exception,
+            _ => throw new NotSupportedException()
+        };
     }
 
     private static string[] GetSubsetArgs(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
