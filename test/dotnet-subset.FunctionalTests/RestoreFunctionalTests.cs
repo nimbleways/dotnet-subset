@@ -50,7 +50,7 @@ public class RestoreFunctionalTests : IDisposable
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         IncrementFileLastByteValue(fileInOutput);
         await AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory).VerifyOutput();
     }
@@ -60,7 +60,7 @@ public class RestoreFunctionalTests : IDisposable
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using (var streamWriter = File.AppendText(fileInOutput.FullName))
         {
             streamWriter.Write(Guid.NewGuid().ToByteArray());
@@ -84,7 +84,7 @@ public class RestoreFunctionalTests : IDisposable
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using Stream _ = GetExclusiveReadStream(fileInOutput);
         await AssertRun(255, restoreTestDescriptor, OutputDirectory).VerifyOutput();
     }
