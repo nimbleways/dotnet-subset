@@ -28,4 +28,10 @@
     <ProjectReference Include="..\..\src\dotnet-subset\dotnet-subset.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+      <AssemblyAttribute Include="Nimbleways.Tools.Subset.Utils.AssemblyRepositoryRootAttribute">
+          <_Parameter1>$([MSBuild]::MakeRelative($(OutputPath), $(RepositoryRoot)))</_Parameter1>
+      </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

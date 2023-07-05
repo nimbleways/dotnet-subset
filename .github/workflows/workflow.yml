@@ -76,7 +76,7 @@ jobs:
     - uses: actions/download-artifact@v3
       with:
         name: job-tests-artifact
-        path: artifacts/${{ env.Configuration }}
+        path: artifacts/${{ env.Configuration }}/bin/
     - name: Install dotnet-subset
       env:
         http_proxy: "http://localhost:15937" # Random proxy
@@ -85,6 +85,4 @@ jobs:
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
-      env:
-        CI_DOTNET_SUBSET_TEST_RESOURCES_DIR: ${{ github.workspace }}/test/_resources
-      run: dotnet test "artifacts\**\*Tests.dll" --verbosity normal --filter FullyQualifiedName~FunctionalTests
+      run: dotnet test "artifacts/${{ env.Configuration }}/bin/**/*Tests.dll" --verbosity normal --filter FullyQualifiedName~FunctionalTests

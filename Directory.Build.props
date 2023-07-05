@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <RepositoryRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</RepositoryRoot>
   </PropertyGroup>
   
   <PropertyGroup>
@@ -44,6 +44,10 @@
           <_Parameter1>false</_Parameter1>
       </AssemblyAttribute>
   </ItemGroup>
+
+  <PropertyGroup>
+    <PathMap>$(RepositoryRoot)=./</PathMap>
+  </PropertyGroup>
 
   <!-- Product and company metadata -->
   <PropertyGroup>

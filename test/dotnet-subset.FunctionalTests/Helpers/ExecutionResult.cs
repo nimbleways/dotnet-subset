@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 
 using Nimbleways.Tools.Subset.Models;
+using Nimbleways.Tools.Subset.Utils;
 
 namespace Nimbleways.Tools.Subset.Helpers;
 
@@ -22,9 +23,11 @@ public class ExecutionResult
 
     public SettingsTask VerifyOutput([CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
     {
-        string snapshotDirectory = $"../Verify/{Path.GetFileNameWithoutExtension(callerFilePath)}";
+        string callerFileRelativeDirectoryPath = Path.GetDirectoryName(callerFilePath).AsNotNull();
+        string rootVerifyDirectory = Path.GetFullPath(Path.Combine(TestHelpers.RepositoryRoot.FullName, callerFileRelativeDirectoryPath, "Verify"));
+        string testClassVerifyDirectory = Path.Combine(rootVerifyDirectory, Path.GetFileNameWithoutExtension(callerFilePath));
         return Verify(ConsoleOutput, extension: "txt")
-        .UseDirectory(snapshotDirectory)
+        .UseDirectory(testClassVerifyDirectory)
         .UseFileName($"ConsoleOutput_{TestDescriptor.OperationName}_{callerMethodName}_{TestDescriptor.TestName}")
             .AddScrubber(stringBuilder => stringBuilder.Replace('\\', '/'))
             .AddScrubber(stringBuilder => stringBuilder.Replace(OutputDirectory.FullName, "{OutputDirectory}"))
