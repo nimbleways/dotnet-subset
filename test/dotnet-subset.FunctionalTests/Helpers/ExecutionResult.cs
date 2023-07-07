@@ -7,6 +7,8 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 public class ExecutionResult
 {
+    private static readonly string ApplicationName = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+
     public int ExitCode { get; }
     public string ConsoleOutput { get; }
 
@@ -30,6 +32,7 @@ public class ExecutionResult
         .UseFileName(fileName)
         .AddScrubber(stringBuilder => stringBuilder.Replace('\\', '/'))
         .AddScrubber(RemoveFatalErrorCallStack)
+        .AddScrubber(stringBuilder => stringBuilder.Replace(ApplicationName, "{ApplicationName}"))
         .DisableDiff();
     }
 

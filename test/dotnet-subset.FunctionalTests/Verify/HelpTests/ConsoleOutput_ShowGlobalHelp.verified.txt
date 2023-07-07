@@ -1,0 +1,13 @@
+﻿Description:
+  .NET Tool to copy a subset of files from a repository to a directory.
+
+Usage:
+  {ApplicationName} [command] [options]
+
+Options:
+  --version       Show version information
+  -?, -h, --help  Show help and usage information
+
+Commands:
+  restore <projectOrSolution>  Create a subset for the restore operation.
+
