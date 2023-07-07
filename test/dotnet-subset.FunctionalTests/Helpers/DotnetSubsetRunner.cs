@@ -5,22 +5,16 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 internal static class DotnetSubsetRunner
 {
-    public static ExecutionResult AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    public static ExecutionResult AssertRun(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output, int? overriddenExpectedExitCode = null, bool noLogo = true)
     {
-        ExecutionResult executionResult = Run(restoreTestDescriptor, output);
-        Assert.Equal(restoreTestDescriptor.ExitCode, executionResult.ExitCode);
-        return executionResult;
-    }
-    public static ExecutionResult AssertRun(int overriddenExpectedExitCode, RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
-    {
-        ExecutionResult executionResult = Run(restoreTestDescriptor, output);
-        Assert.Equal(overriddenExpectedExitCode, executionResult.ExitCode);
+        ExecutionResult executionResult = Run(restoreTestDescriptor, output, noLogo);
+        Assert.Equal(overriddenExpectedExitCode ?? restoreTestDescriptor.ExitCode, executionResult.ExitCode);
         return executionResult;
     }
 
-    private static ExecutionResult Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    private static ExecutionResult Run(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output, bool noLogo)
     {
-        string[] subsetArgs = GetSubsetArgs(restoreTestDescriptor, output);
+        var subsetArgs = GetSubsetArgs(restoreTestDescriptor, output, noLogo);
         DirectoryInfo workingDirectory = restoreTestDescriptor.Root;
         InternalResult result = IsRunningInCI()
             ? RunProcess(subsetArgs, workingDirectory)
@@ -77,18 +71,22 @@ internal static class DotnetSubsetRunner
         };
     }
 
-    private static string[] GetSubsetArgs(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output)
+    private static string[] GetSubsetArgs(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output, bool noLogo)
     {
         string projectOrSolution = Path.Combine(restoreTestDescriptor.Root.FullName, restoreTestDescriptor.CommandInputs.ProjectOrSolution);
-        return new[]
+        var args = new[]
         {
             "restore",
             projectOrSolution,
             "--output",
             output.FullName,
             "--root-directory",
-            restoreTestDescriptor.Root.FullName,
-            "--nologo"
+            restoreTestDescriptor.Root.FullName
         };
+        if (noLogo)
+        {
+            args = args.Append("--nologo").ToArray();
+        }
+        return args;
     }
 }

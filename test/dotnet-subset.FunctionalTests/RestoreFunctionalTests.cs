@@ -52,7 +52,7 @@ public class RestoreFunctionalTests : IDisposable
         AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         IncrementFileLastByteValue(fileInOutput);
-        await AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertRun(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class RestoreFunctionalTests : IDisposable
             streamWriter.Write(Guid.NewGuid().ToByteArray());
         }
 
-        await AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertRun(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class RestoreFunctionalTests : IDisposable
         AssertRun(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using Stream _ = GetExclusiveReadStream(fileInOutput);
-        await AssertRun(255, restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertRun(restoreTestDescriptor, OutputDirectory, 255).VerifyOutput();
     }
 
     [Fact]
@@ -96,7 +96,15 @@ public class RestoreFunctionalTests : IDisposable
         rootDir.Create();
         var projectFile = new FileInfo(Path.Combine(OutputDirectory.FullName, "project.csproj"));
         var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "test", new RestoreCommandInputs(projectFile.FullName));
-        await AssertRun(InvalidRootDirectoryException.EXIT_CODE, restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertRun(restoreTestDescriptor, OutputDirectory, InvalidRootDirectoryException.EXIT_CODE).VerifyOutput();
+    }
+
+    [Fact]
+    public void PrintApplicationAndRuntimeVersionsInFirstLineWhenNoLogoIsFalse()
+    {
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        string consoleOutput = AssertRun(restoreTestDescriptor, OutputDirectory, noLogo: false).ConsoleOutput;
+        Assert.Matches(@"^\w+ (\d+\.){2}\d+ \(\.NET Runtime (\d+\.){2}\d+\)", consoleOutput);
     }
 
     private static FileStream GetExclusiveReadStream(FileInfo fileInOutput)
