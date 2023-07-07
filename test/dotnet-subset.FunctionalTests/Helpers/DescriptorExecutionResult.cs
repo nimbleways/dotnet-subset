@@ -17,11 +17,11 @@ public class DescriptorExecutionResult : ExecutionResult
     public TestDescriptor TestDescriptor { get; }
     public DirectoryInfo OutputDirectory { get; }
 
-    public override SettingsTask VerifyOutput([CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
+    public override SettingsTask VerifyOutput(Func<SettingsTask, SettingsTask>? configure = null, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
     {
         string testClassVerifyDirectory = GetDirectory(callerFilePath);
         string fileName = $"ConsoleOutput_{TestDescriptor.OperationName}_{callerMethodName}_{TestDescriptor.TestName}";
-        return Verify(testClassVerifyDirectory, fileName)
+        return Verify(configure, testClassVerifyDirectory, fileName)
             .AddScrubber(stringBuilder => stringBuilder.Replace(OutputDirectory.FullName, "{OutputDirectory}"))
             .AddScrubber(stringBuilder => stringBuilder.Replace(TestDescriptor.Root.FullName, "{SourceRootDirectory}"));
     }

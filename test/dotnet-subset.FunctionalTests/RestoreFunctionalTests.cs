@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using Nimbleways.Tools.Subset.Exceptions;
 using Nimbleways.Tools.Subset.Helpers;
 using Nimbleways.Tools.Subset.Models;
@@ -100,11 +102,12 @@ public class RestoreFunctionalTests : IDisposable
     }
 
     [Fact]
-    public void PrintApplicationAndRuntimeVersionsInFirstLineWhenNoLogoIsFalse()
+    public async Task PrintApplicationAndRuntimeVersionsInFirstLineWhenNoLogoIsFalse()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        string consoleOutput = AssertDescriptor(restoreTestDescriptor, OutputDirectory, noLogo: false).ConsoleOutput;
-        Assert.Matches(@"^\w+ (\d+\.){2}\d+ \(\.NET Runtime (\d+\.){2}\d+\)", consoleOutput);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, noLogo: false)
+            .VerifyOutput(
+            t => t.ScrubLinesWithReplace(line => Regex.Replace(line, @"^\{ApplicationName\} (\d+\.){2}\d+ \(\.NET Runtime (\d+\.){2}\d+\)$", "{ApplicationName} {ApplicationVersion} (.NET Runtime {DotNETRuntimeVersion})")));
     }
 
     private static FileStream GetExclusiveReadStream(FileInfo fileInOutput)

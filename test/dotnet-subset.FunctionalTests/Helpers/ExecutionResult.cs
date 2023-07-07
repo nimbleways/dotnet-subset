@@ -18,18 +18,24 @@ public class ExecutionResult
         ConsoleOutput = consoleOutput;
     }
 
-    public virtual SettingsTask VerifyOutput([CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
+    public virtual SettingsTask VerifyOutput(Func<SettingsTask, SettingsTask>? configure = null, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
     {
         string testClassVerifyDirectory = GetDirectory(callerFilePath);
         string fileName = $"ConsoleOutput_{callerMethodName}";
-        return Verify(testClassVerifyDirectory, fileName);
+        return Verify(configure, testClassVerifyDirectory, fileName);
     }
 
-    protected SettingsTask Verify(string directory, string fileName)
+    protected SettingsTask Verify(Func<SettingsTask, SettingsTask>? configure, string directory, string fileName)
     {
-        return Verifier.Verify(ConsoleOutput, extension: "txt")
-        .UseDirectory(directory)
-        .UseFileName(fileName)
+        SettingsTask verifyTask = Verifier
+            .Verify(ConsoleOutput, extension: "txt")
+            .UseDirectory(directory)
+            .UseFileName(fileName);
+        if (configure is not null)
+        {
+            verifyTask = configure(verifyTask);
+        }
+        return verifyTask
         .AddScrubber(stringBuilder => stringBuilder.Replace('\\', '/'))
         .AddScrubber(RemoveFatalErrorCallStack)
         .AddScrubber(stringBuilder => stringBuilder.Replace(ApplicationName, "{ApplicationName}"))
