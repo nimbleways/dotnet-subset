@@ -29,7 +29,7 @@ public class RestoreFunctionalTests : IDisposable
     [MemberData(nameof(GetRestoreTestDescriptors))]
     public async Task RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
     {
-        await AssertRun(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         if (restoreTestDescriptor.ExitCode == 0)
         {
             Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
@@ -40,8 +40,8 @@ public class RestoreFunctionalTests : IDisposable
     public async Task CanRunTwiceWithSameArguments()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
-        await AssertRun(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
@@ -49,33 +49,33 @@ public class RestoreFunctionalTests : IDisposable
     public async Task FailsIfOutputContainsANonIdenticalFileWithSameSize()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         IncrementFileLastByteValue(fileInOutput);
-        await AssertRun(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
     public async Task FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using (var streamWriter = File.AppendText(fileInOutput.FullName))
         {
             streamWriter.Write(Guid.NewGuid().ToByteArray());
         }
 
-        await AssertRun(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
     public async Task CopyMissingFilesInOutput()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         DeleteHalfTheFiles(OutputDirectory);
-        await AssertRun(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
@@ -83,10 +83,10 @@ public class RestoreFunctionalTests : IDisposable
     public async Task Return255ForUnexpectedErrors()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using Stream _ = GetExclusiveReadStream(fileInOutput);
-        await AssertRun(restoreTestDescriptor, OutputDirectory, 255).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, 255).VerifyOutput();
     }
 
     [Fact]
@@ -96,14 +96,14 @@ public class RestoreFunctionalTests : IDisposable
         rootDir.Create();
         var projectFile = new FileInfo(Path.Combine(OutputDirectory.FullName, "project.csproj"));
         var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "test", new RestoreCommandInputs(projectFile.FullName));
-        await AssertRun(restoreTestDescriptor, OutputDirectory, InvalidRootDirectoryException.EXIT_CODE).VerifyOutput();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, InvalidRootDirectoryException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
     public void PrintApplicationAndRuntimeVersionsInFirstLineWhenNoLogoIsFalse()
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
-        string consoleOutput = AssertRun(restoreTestDescriptor, OutputDirectory, noLogo: false).ConsoleOutput;
+        string consoleOutput = AssertDescriptor(restoreTestDescriptor, OutputDirectory, noLogo: false).ConsoleOutput;
         Assert.Matches(@"^\w+ (\d+\.){2}\d+ \(\.NET Runtime (\d+\.){2}\d+\)", consoleOutput);
     }
 
