@@ -11,6 +11,8 @@ internal sealed class ProcessRunner : IDisposable
 {
     private readonly Process _process;
     private readonly StringBuilder _outputCapture;
+    private readonly ManualResetEventSlim _stdoutHandle;
+    private readonly ManualResetEventSlim _stderrHandle;
     private readonly object _pipeCaptureLock = new();
     private bool _disposed;
 
@@ -28,8 +30,10 @@ internal sealed class ProcessRunner : IDisposable
             },
             EnableRaisingEvents = true,
         };
-        _process.OutputDataReceived += OnDataReceived;
-        _process.ErrorDataReceived += OnDataReceived;
+        _process.OutputDataReceived += OnOutputDataReceived;
+        _process.ErrorDataReceived += OnErrorDataReceived;
+        _stdoutHandle = new ManualResetEventSlim(false);
+        _stderrHandle = new ManualResetEventSlim(false);
 
         _outputCapture = new StringBuilder();
     }
@@ -48,23 +52,41 @@ internal sealed class ProcessRunner : IDisposable
         {
             return new ProcessFailureResult(new ProcessTimeoutException(_process, timeout));
         }
-
+        _stdoutHandle.Wait();
+        _stderrHandle.Wait();
         return new ProcessExitedResult(_process.ExitCode, _outputCapture.ToString());
     }
 
-    private void OnDataReceived(object sender, DataReceivedEventArgs e)
+    private void OnOutputDataReceived(object sender, DataReceivedEventArgs e)
     {
         if (e.Data == null)
         {
+            _stdoutHandle.Set();
             return;
         }
 
+        HandleData(e.Data);
+    }
+
+    private void OnErrorDataReceived(object sender, DataReceivedEventArgs e)
+    {
+        if (e.Data == null)
+        {
+            _stderrHandle.Set();
+            return;
+        }
+
+        HandleData(e.Data);
+    }
+
+    private void HandleData(string data)
+    {
         lock (_pipeCaptureLock)
         {
-            _outputCapture.AppendLine(e.Data);
+            _outputCapture.AppendLine(data);
             if (!_disposed)
             {
-                Console.WriteLine(e.Data);
+                Console.WriteLine(data);
             }
         }
     }
@@ -86,8 +108,10 @@ internal sealed class ProcessRunner : IDisposable
         _process.CancelOutputRead();
         _process.CancelErrorRead();
 
-        _process.ErrorDataReceived -= OnDataReceived;
-        _process.OutputDataReceived -= OnDataReceived;
+        _process.ErrorDataReceived -= OnOutputDataReceived;
+        _process.OutputDataReceived -= OnOutputDataReceived;
+        _stdoutHandle.Dispose();
+        _stderrHandle.Dispose();
         _process.Dispose();
     }
 }
