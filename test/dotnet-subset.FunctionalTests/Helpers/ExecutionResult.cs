@@ -1,3 +1,4 @@
+using System.CommandLine;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -7,15 +8,18 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 public class ExecutionResult
 {
-    private static readonly string ApplicationName = Path.GetFileNameWithoutExtension(Environment.GetCommandLineArgs()[0]);
+    private readonly string _applicationName;
 
     public int ExitCode { get; }
     public string ConsoleOutput { get; }
+    public bool IsOutOfProcess { get; }
 
-    public ExecutionResult(int exitCode, string consoleOutput)
+    public ExecutionResult(int exitCode, string consoleOutput, bool isOutOfProcess)
     {
         ExitCode = exitCode;
         ConsoleOutput = consoleOutput;
+        IsOutOfProcess = isOutOfProcess;
+        _applicationName = isOutOfProcess ? "dotnet-subset" : RootCommand.ExecutableName;
     }
 
     public virtual SettingsTask VerifyOutput(Func<SettingsTask, SettingsTask>? configure = null, [CallerMemberName] string callerMethodName = "", [CallerFilePath] string callerFilePath = "")
@@ -38,7 +42,7 @@ public class ExecutionResult
         return verifyTask
         .AddScrubber(stringBuilder => stringBuilder.Replace('\\', '/'))
         .AddScrubber(RemoveFatalErrorCallStack)
-        .AddScrubber(stringBuilder => stringBuilder.Replace(ApplicationName, "{ApplicationName}"))
+        .AddScrubber(stringBuilder => stringBuilder.Replace(_applicationName, "{ApplicationName}"))
         .DisableDiff();
     }
 

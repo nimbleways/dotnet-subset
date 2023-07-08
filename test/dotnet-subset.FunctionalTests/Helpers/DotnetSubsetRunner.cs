@@ -24,7 +24,7 @@ internal static class DotnetSubsetRunner
         var subsetArgs = GetSubsetArgs(restoreTestDescriptor, output, noLogo);
         DirectoryInfo workingDirectory = restoreTestDescriptor.Root;
         ExecutionResult result = Run(subsetArgs, workingDirectory);
-        return new DescriptorExecutionResult(restoreTestDescriptor, output, result.ExitCode, result.ConsoleOutput);
+        return new DescriptorExecutionResult(restoreTestDescriptor, output, result.ExitCode, result.ConsoleOutput, isOutOfProcess: result.IsOutOfProcess);
     }
 
     private static string[] GetSubsetArgs(RestoreTestDescriptor restoreTestDescriptor, DirectoryInfo output, bool noLogo)
@@ -65,7 +65,7 @@ internal static class DotnetSubsetRunner
             try
             {
                 Environment.CurrentDirectory = workingDirectory.FullName;
-                return new(Program.Main(subsetArgs), writer.ToString());
+                return new(Program.Main(subsetArgs), writer.ToString(), isOutOfProcess: false);
             }
             finally
             {
@@ -86,7 +86,7 @@ internal static class DotnetSubsetRunner
 
         return processResult switch
         {
-            ProcessExitedResult result => new(result.ExitCode, result.Output),
+            ProcessExitedResult result => new(result.ExitCode, result.Output, isOutOfProcess: true),
             ProcessFailureResult { Exception: var exception } => throw exception,
             _ => throw new NotSupportedException()
         };

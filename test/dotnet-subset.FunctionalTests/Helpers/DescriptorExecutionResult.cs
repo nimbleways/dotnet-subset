@@ -7,8 +7,8 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 public class DescriptorExecutionResult : ExecutionResult
 {
-    public DescriptorExecutionResult(TestDescriptor testDescriptor, DirectoryInfo outputDirectory, int exitCode, string consoleOutput)
-        : base(exitCode, consoleOutput)
+    public DescriptorExecutionResult(TestDescriptor testDescriptor, DirectoryInfo outputDirectory, int exitCode, string consoleOutput, bool isOutOfProcess)
+        : base(exitCode, consoleOutput, isOutOfProcess)
     {
         TestDescriptor = testDescriptor;
         OutputDirectory = outputDirectory;
