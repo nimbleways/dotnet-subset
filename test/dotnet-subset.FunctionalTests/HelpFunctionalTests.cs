@@ -3,7 +3,7 @@ using Nimbleways.Tools.Subset.Helpers;
 namespace Nimbleways.Tools.Subset;
 
 [UsesVerify]
-public class HelpTests
+public class HelpFunctionalTests
 {
     [Fact]
     public async Task ShowGlobalHelp()
