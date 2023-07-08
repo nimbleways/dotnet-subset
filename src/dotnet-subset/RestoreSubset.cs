@@ -22,6 +22,7 @@ internal static class RestoreSubset
         }
         var projectListAsString = string.Join(Environment.NewLine + " - ", projectsByFullPath.Keys.OrderBy(f => f));
         Console.WriteLine($"Found {projectsByFullPath.Count} project(s) to copy:{Environment.NewLine + " - "}{projectListAsString}");
+        Console.WriteLine();
         var nugetConfigFiles = GetNugetConfigFiles(rootFolder, projectsByFullPath);
         var extraFilesInvolvedInRestore = projectsByFullPath.Values
             .SelectMany(project => GetExtraFilesInvolvedInRestore(rootFolder, project))
@@ -36,6 +37,7 @@ internal static class RestoreSubset
         {
             var extraFilesInvolvedInRestoreAsString = string.Join(Environment.NewLine + " - ", extraFilesInvolvedInRestore.Select(f => f.FullName).OrderBy(f => f));
             Console.WriteLine($"Found {extraFilesInvolvedInRestore.Count} extra file(s) to copy:{Environment.NewLine + " - "}{extraFilesInvolvedInRestoreAsString}");
+            Console.WriteLine();
         }
         var allFilesToCopy = projectsByFullPath.Keys
             .Select(fullPath => new FileInfo(fullPath))

@@ -1,0 +1,17 @@
+﻿Description:
+  Create a subset for the restore operation.
+
+Usage:
+  {ApplicationName} restore <projectOrSolution> [options]
+
+Arguments:
+  <projectOrSolution>  Project or solution to restore.
+
+Options:
+  --root-directory <root-directory> (REQUIRED)  Directory from where the files will be copied, usually the repository's root.
+  --output <output> (REQUIRED)                  Directory where the subset files will be copied, preserving the original hierarchy.
+  --nologo                                      Do not display the startup banner.
+  -?, -h, --help                                Show help and usage information
+
+
+

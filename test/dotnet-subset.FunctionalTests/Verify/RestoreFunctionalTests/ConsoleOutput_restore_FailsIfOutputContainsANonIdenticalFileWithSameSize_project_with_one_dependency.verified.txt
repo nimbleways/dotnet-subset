@@ -1,0 +1,5 @@
+﻿Found 2 project(s) to copy:
+ - {SourceRootDirectory}/src/BuildingBlocks/Application/CompanyName.MyMeetings.BuildingBlocks.Application.csproj
+ - {SourceRootDirectory}/src/BuildingBlocks/Domain/CompanyName.MyMeetings.BuildingBlocks.Domain.csproj
+
+ERROR: Cannot copy '{SourceRootDirectory}/src/BuildingBlocks/Application/CompanyName.MyMeetings.BuildingBlocks.Application.csproj' to '{OutputDirectory}/src/BuildingBlocks/Application/CompanyName.MyMeetings.BuildingBlocks.Application.csproj': destination file already exist but have different content from source file

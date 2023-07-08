@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 using Nimbleways.Tools.Subset.Exceptions;
 using Nimbleways.Tools.Subset.Helpers;
 using Nimbleways.Tools.Subset.Models;
@@ -7,6 +9,7 @@ using static Nimbleways.Tools.Subset.Helpers.DotnetSubsetRunner;
 
 namespace Nimbleways.Tools.Subset;
 
+[UsesVerify]
 public class RestoreFunctionalTests : IDisposable
 {
     private static readonly IReadOnlyCollection<TestDescriptor> AllTestDescriptors = TestHelpers.GetTestDescriptors();
@@ -26,9 +29,9 @@ public class RestoreFunctionalTests : IDisposable
 
     [Theory]
     [MemberData(nameof(GetRestoreTestDescriptors))]
-    public void RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
+    public async Task RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
     {
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         if (restoreTestDescriptor.ExitCode == 0)
         {
             Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
@@ -36,66 +39,75 @@ public class RestoreFunctionalTests : IDisposable
     }
 
     [Fact]
-    public void CanRunTwiceWithSameArguments()
+    public async Task CanRunTwiceWithSameArguments()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
     [Fact]
-    public void FailsIfOutputContainsANonIdenticalFileWithSameSize()
+    public async Task FailsIfOutputContainsANonIdenticalFileWithSameSize()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         IncrementFileLastByteValue(fileInOutput);
-        AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
-    public void FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
+    public async Task FailsIfOutputContainsANonIdenticalFileWithDifferentSize()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using (var streamWriter = File.AppendText(fileInOutput.FullName))
         {
             streamWriter.Write(Guid.NewGuid().ToByteArray());
         }
 
-        AssertRun(DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, DestinationFileAlreadyExistsAndNotIdenticalException.EXIT_CODE).VerifyOutput();
     }
 
     [Fact]
-    public void CopyMissingFilesInOutput()
+    public async Task CopyMissingFilesInOutput()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         DeleteHalfTheFiles(OutputDirectory);
-        AssertRun(restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
     }
 
     [Fact]
-    public void ReturnMinusOneForUnexpectedErrors()
+    public async Task Return255ForUnexpectedErrors()
     {
-        var restoreTestDescriptor = GetSuccessRestoreTestDescriptor();
-        AssertRun(restoreTestDescriptor, OutputDirectory);
-        var fileInOutput = OutputDirectory.EnumerateFiles("*", SearchOption.AllDirectories).First(f => f.Length > 0);
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        AssertDescriptor(restoreTestDescriptor, OutputDirectory);
+        var fileInOutput = OutputDirectory.EnumerateFiles("CompanyName.MyMeetings.BuildingBlocks.Application.csproj", SearchOption.AllDirectories).Single();
         using Stream _ = GetExclusiveReadStream(fileInOutput);
-        AssertRun(255, restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, 255).VerifyOutput();
     }
 
     [Fact]
-    public void FailWhenProjectIsNotUnderRootDirectory()
+    public async Task FailWhenProjectIsNotUnderRootDirectory()
     {
         var rootDir = new DirectoryInfo(Path.Combine(OutputDirectory.FullName, "SampleDir", "root"));
         rootDir.Create();
         var projectFile = new FileInfo(Path.Combine(OutputDirectory.FullName, "project.csproj"));
         var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "test", new RestoreCommandInputs(projectFile.FullName));
-        AssertRun(InvalidRootDirectoryException.EXIT_CODE, restoreTestDescriptor, OutputDirectory);
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, InvalidRootDirectoryException.EXIT_CODE).VerifyOutput();
+    }
+
+    [Fact]
+    public async Task PrintApplicationAndRuntimeVersionsInFirstLineWhenNoLogoIsFalse()
+    {
+        var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
+        await AssertDescriptor(restoreTestDescriptor, OutputDirectory, noLogo: false)
+            .VerifyOutput(
+            t => t.ScrubLinesWithReplace(line => Regex.Replace(line, @"^\{ApplicationName\} (\d+\.){2}\d+ \(\.NET Runtime (\d+\.){2}\d+\)$", "{ApplicationName} {ApplicationVersion} (.NET Runtime {DotNETRuntimeVersion})")));
     }
 
     private static FileStream GetExclusiveReadStream(FileInfo fileInOutput)
@@ -103,9 +115,9 @@ public class RestoreFunctionalTests : IDisposable
         return fileInOutput.Open(FileMode.Open, FileAccess.Read, FileShare.None);
     }
 
-    private static RestoreTestDescriptor GetSuccessRestoreTestDescriptor()
+    private static RestoreTestDescriptor GetProjectWithOneDependencyRestoreTestDescriptor()
     {
-        return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.ExitCode == 0);
+        return AllTestDescriptors.OfType<RestoreTestDescriptor>().First(rtd => rtd.TestName == "project_with_one_dependency");
     }
 
     private static void DeleteHalfTheFiles(DirectoryInfo directory)

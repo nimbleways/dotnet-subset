@@ -1,4 +1,4 @@
-using System.Runtime.CompilerServices;
+using System.Reflection;
 
 using Nimbleways.Tools.Subset.Models;
 using Nimbleways.Tools.Subset.Utils;
@@ -10,12 +10,27 @@ namespace Nimbleways.Tools.Subset.Helpers;
 
 internal static class TestHelpers
 {
+    public static readonly DirectoryInfo RepositoryRoot = GetRepositoryRoot();
+
     public static IReadOnlyCollection<TestDescriptor> GetTestDescriptors()
     {
         var testsTomlFiles = GetTestsTomlFiles();
         TestDescriptor[] testDescriptors = testsTomlFiles.SelectMany(GetTestDescriptors).ToArray();
         EnsureTestNamesUniqueness(testDescriptors);
         return testDescriptors;
+    }
+
+    private static DirectoryInfo GetRepositoryRoot()
+    {
+        Assembly currentAssembly = Assembly.GetExecutingAssembly();
+        var repositoryRootRelativePathToAssembly = currentAssembly
+            .GetCustomAttribute<AssemblyRepositoryRootAttribute>()
+            .AsNotNull()
+            .RepositoryRootRelativePathToAssembly;
+        string assemblyPath = Path.GetDirectoryName(currentAssembly.Location).AsNotNull();
+        DirectoryInfo repositoryRoot = new(Path.Combine(assemblyPath, repositoryRootRelativePathToAssembly));
+        EnsureExists(repositoryRoot);
+        return repositoryRoot;
     }
 
     private static void EnsureTestNamesUniqueness(TestDescriptor[] testDescriptors)
@@ -45,18 +60,7 @@ internal static class TestHelpers
 
     private static DirectoryInfo GetTestResourcesDirectory()
     {
-        if (Environment.GetEnvironmentVariable("CI_DOTNET_SUBSET_TEST_RESOURCES_DIR") is { } path)
-        {
-            Console.WriteLine("Using CI_DOTNET_SUBSET_TEST_RESOURCES_DIR");
-            return new(path);
-        }
-        var thisDir = Directory.GetParent(GetThisFilePath()).AsNotNull();
-        return new(Path.Combine(thisDir.FullName, "..", "..", "_resources"));
-
-        static string GetThisFilePath([CallerFilePath] string filePath = null!)
-        {
-            return filePath;
-        }
+        return new(Path.Combine(RepositoryRoot.FullName, "test", "_resources"));
     }
 
     private static void EnsureExists(DirectoryInfo directoryInfo)

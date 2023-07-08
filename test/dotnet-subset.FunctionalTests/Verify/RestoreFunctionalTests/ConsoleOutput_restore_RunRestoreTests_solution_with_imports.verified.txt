@@ -1,0 +1,11 @@
+﻿Found 2 project(s) to copy:
+ - {SourceRootDirectory}/Project1/Project1.csproj
+ - {SourceRootDirectory}/Project2/Project2.csproj
+
+Found 4 extra file(s) to copy:
+ - {SourceRootDirectory}/Directory.Build.props
+ - {SourceRootDirectory}/Directory.Build.targets
+ - {SourceRootDirectory}/Project2/Custom.targets
+ - {SourceRootDirectory}/Solution.sln
+
+Copied 6 file(s) to '{OutputDirectory}'. 0 file(s) already exist in destination.
