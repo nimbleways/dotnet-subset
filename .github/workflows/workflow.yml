@@ -86,3 +86,11 @@ jobs:
       run: dotnet subset --version
     - name: Functional Tests
       run: dotnet test "artifacts/${{ env.Configuration }}/bin/**/*Tests.dll" --verbosity normal --filter FullyQualifiedName~FunctionalTests
+    - name: upload Verify received files on failure
+      if: failure()
+      uses: actions/upload-artifact@v3
+      with:
+        name: job-snapshot-artifact
+        retention-days: "1"
+        path: |
+          **/*.received.*
