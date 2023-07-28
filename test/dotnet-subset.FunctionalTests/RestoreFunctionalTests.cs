@@ -31,11 +31,12 @@ public class RestoreFunctionalTests : IDisposable
     [MemberData(nameof(GetRestoreTestDescriptors))]
     public async Task RunRestoreTests(RestoreTestDescriptor restoreTestDescriptor)
     {
-        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        DescriptorExecutionResult result = AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         if (restoreTestDescriptor.ExitCode == 0)
         {
             Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
         }
+        await result.VerifyOutput();
     }
 
     [Fact]
@@ -43,8 +44,9 @@ public class RestoreFunctionalTests : IDisposable
     {
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertDescriptor(restoreTestDescriptor, OutputDirectory);
-        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        DescriptorExecutionResult result = AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+        await result.VerifyOutput();
     }
 
     [Fact]
@@ -77,8 +79,9 @@ public class RestoreFunctionalTests : IDisposable
         var restoreTestDescriptor = GetProjectWithOneDependencyRestoreTestDescriptor();
         AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         DeleteHalfTheFiles(OutputDirectory);
-        await AssertDescriptor(restoreTestDescriptor, OutputDirectory).VerifyOutput();
+        DescriptorExecutionResult result = AssertDescriptor(restoreTestDescriptor, OutputDirectory);
         Assert.True(DirectoryDiff.AreDirectoriesIdentical(restoreTestDescriptor.ExpectedDirectory, OutputDirectory));
+        await result.VerifyOutput();
     }
 
     [Fact]
