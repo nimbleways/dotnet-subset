@@ -44,4 +44,8 @@ The tool is mainly used in Dockerfiles to optimize the docker build caching for 
       <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
 </Project>

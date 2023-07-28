@@ -1,3 +1,5 @@
+using Common;
+
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 
