@@ -100,7 +100,7 @@ public class RestoreFunctionalTests : IDisposable
         var rootDir = new DirectoryInfo(Path.Combine(OutputDirectory.FullName, "SampleDir", "root"));
         rootDir.Create();
         var projectFile = new FileInfo(Path.Combine(OutputDirectory.FullName, "project.csproj"));
-        var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "test", new RestoreCommandInputs(projectFile.FullName));
+        var restoreTestDescriptor = new RestoreTestDescriptor(rootDir.Parent.AsNotNull(), "root", "test", new RestoreCommandInputs(projectFile.FullName));
         await AssertDescriptor(restoreTestDescriptor, OutputDirectory, InvalidRootDirectoryException.EXIT_CODE).VerifyOutput();
     }
 
