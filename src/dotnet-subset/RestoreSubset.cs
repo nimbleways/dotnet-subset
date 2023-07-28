@@ -14,7 +14,6 @@ internal static class RestoreSubset
         {
             throw new InvalidRootDirectoryException(projectOrSolution, rootFolder);
         }
-        destinationFolder.Create();
 
         using var projectCollection = new ProjectCollection();
         var projectsByFullPath = new Dictionary<string, Project>();
@@ -159,9 +158,9 @@ internal static class RestoreSubset
     }
     private static IEnumerable<FileInfo> GetNugetConfigFiles(DirectoryInfo rootFolder, Dictionary<string, Project> projects)
     {
-        static void GetNugetConfigFiles(DirectoryInfo rootFolder, DirectoryInfo? folder, IDictionary<string, FileInfo> nugetConfigFiles)
+        static void GetNugetConfigFiles(DirectoryInfo rootFolder, DirectoryInfo folder, IDictionary<string, FileInfo> nugetConfigFiles)
         {
-            if (folder == null || nugetConfigFiles.ContainsKey(folder.FullName) || !IsSameOrUnder(rootFolder, folder))
+            if (nugetConfigFiles.ContainsKey(folder.FullName) || !IsSameOrUnder(rootFolder, folder))
             {
                 return;
             }

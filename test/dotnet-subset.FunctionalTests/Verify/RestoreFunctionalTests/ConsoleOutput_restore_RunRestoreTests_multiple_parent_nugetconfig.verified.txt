@@ -1,0 +1,9 @@
+﻿Found 1 project(s) to copy:
+ - {SourceRootDirectory}/src/Project/Project.csproj
+
+Found 3 extra file(s) to copy:
+ - {SourceRootDirectory}/NuGet.Config
+ - {SourceRootDirectory}/src/NuGet.config
+ - {SourceRootDirectory}/src/Project/nuget.config
+
+Copied 4 file(s) to '{OutputDirectory}'. 0 file(s) already exist in destination.

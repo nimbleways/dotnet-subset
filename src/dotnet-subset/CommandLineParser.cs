@@ -9,19 +9,18 @@ namespace Nimbleways.Tools.Subset;
 
 internal static class CommandLineParser
 {
-    public static Parser GetCommandLineParser(Action initialize)
+    public static Parser GetCommandLineParser()
     {
         var rootCommand = new RootCommand(".NET Tool to copy a subset of files from a repository to a directory.");
         rootCommand.AddCommand(GetRestoreCommand());
-        return GetCommandLineBuilder(rootCommand, initialize).Build();
+        return GetCommandLineBuilder(rootCommand).Build();
     }
 
-    private static CommandLineBuilder GetCommandLineBuilder(RootCommand rootCommand, Action initialize)
+    private static CommandLineBuilder GetCommandLineBuilder(RootCommand rootCommand)
     {
         var commandLineBuilder = new CommandLineBuilder(rootCommand);
         commandLineBuilder.UseDefaults();
         commandLineBuilder.AddMiddleware(PrintApplicationAndRuntimeVersions);
-        commandLineBuilder.AddMiddleware(_ => initialize());
         commandLineBuilder.UseExceptionHandler((Exception exception, InvocationContext context) =>
         {
             (int exitCode, string message) = exception switch
