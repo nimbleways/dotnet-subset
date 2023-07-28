@@ -3,4 +3,15 @@
     <IsPackable Condition="'$(PackAsTool)' == 'true'">true</IsPackable>
     <IsPublishable>$(IsPackable)</IsPublishable>
   </PropertyGroup>
+  
+  <!-- Workaround for a bug in one of Stryker dependencies -->
+  <!-- https://github.com/daveaglick/Buildalyzer/issues/108 -->
+  <Target Name="MakeCompileItemsRelative" BeforeTargets="CoreCompile">
+    <ItemGroup>
+      <CompileWithRelativePaths Include="@(Compile->'$([MSBuild]::MakeRelative('$(MSBuildProjectDirectory)', '%(Compile.Identity)'))')" />
+      <Compile Remove="@(Compile)" />
+      <Compile Include="@(CompileWithRelativePaths)" />
+    </ItemGroup>
+  </Target>
+
 </Project>

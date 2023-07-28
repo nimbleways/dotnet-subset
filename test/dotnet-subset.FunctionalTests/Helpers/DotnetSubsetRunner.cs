@@ -14,7 +14,7 @@ internal static class DotnetSubsetRunner
 
     public static ExecutionResult Run(string[] subsetArgs, DirectoryInfo workingDirectory)
     {
-        return IsRunningInCI()
+        return MustRunAsDotnetTool()
             ? RunProcess(subsetArgs, workingDirectory)
             : RunMain(subsetArgs, workingDirectory);
     }
@@ -46,10 +46,10 @@ internal static class DotnetSubsetRunner
         return args;
     }
 
-    private static bool IsRunningInCI()
+    private static bool MustRunAsDotnetTool()
     {
-        string? ciEnvVar = Environment.GetEnvironmentVariable("CI");
-        return string.Equals(ciEnvVar, "true", StringComparison.OrdinalIgnoreCase);
+        string? envVar = Environment.GetEnvironmentVariable("DOTNET_SUBSET_TESTS_RUN_AS_DOTNET_TOOL");
+        return string.Equals(envVar, "true", StringComparison.OrdinalIgnoreCase);
     }
 
     private static readonly object WorkingDirLock = new();
