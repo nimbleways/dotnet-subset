@@ -1,0 +1,4 @@
+[[restore]]
+test_name="multiple_parent_nugetconfig"
+root_directory="root/repository"
+project_or_solution="src/Project/Project.csproj"

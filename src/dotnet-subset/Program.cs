@@ -10,18 +10,14 @@ namespace Nimbleways.Tools.Subset;
 
 public static class Program
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0052:Remove unread private members", Justification = "<Pending>")]
-    private static VisualStudioInstance? s_visualStudioInstance;
+    static Program()
+    {
+        MSBuildLocator.RegisterDefaults();
+    }
 
     public static int Main(string[] args)
     {
-        SetVisualStudionInstance();
-        Parser parser = CommandLineParser.GetCommandLineParser(SetVisualStudionInstance);
+        Parser parser = CommandLineParser.GetCommandLineParser();
         return parser.Invoke(args);
-    }
-
-    private static void SetVisualStudionInstance()
-    {
-        s_visualStudioInstance ??= MSBuildLocator.RegisterDefaults();
     }
 }
