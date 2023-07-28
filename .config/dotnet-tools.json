@@ -7,6 +7,12 @@
       "commands": [
         "dotnet-verify"
       ]
+    },
+    "dotnet-stryker": {
+      "version": "3.9.2",
+      "commands": [
+        "dotnet-stryker"
+      ]
     }
   }
 }

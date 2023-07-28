@@ -61,6 +61,8 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
         dotnet: [ '6.0.x', '7.0.x' ]
     runs-on: ${{ matrix.os }}
+    env:
+      DOTNET_SUBSET_TESTS_RUN_AS_DOTNET_TOOL: "true"
     steps:
     - uses: actions/checkout@v3
     - name: Setup .NET
@@ -94,3 +96,30 @@ jobs:
         retention-days: "1"
         path: |
           **/*.received.*
+
+  mutation_tests:
+    name: Run mutation tests
+    runs-on: ubuntu-latest
+    env:
+      DOTNET_INSTALL_DIR: .temp/dotnet
+      DOTNET_ROOT: .temp/dotnet
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+    - name: dotnet --info
+      run:  dotnet --info
+    - name: Restore dotnet tools
+      run:  dotnet tool restore
+    - name: Mutation tests
+      run: dotnet stryker
+    - name: Upload mutation report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: job-mutation-report-artifact
+        retention-days: "1"
+        path: |
+          StrykerOutput

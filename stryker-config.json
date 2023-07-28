@@ -1,0 +1,16 @@
+{
+  "stryker-config": {
+    "ignore-mutations": [
+      "linq.SingleOrDefault",
+      "linq.Single",
+      "linq.FirstOrDefault",
+      "linq.First"
+    ],
+    "thresholds": {
+      "high": 100,
+      "low": 100,
+      "break": 100
+    },
+    "break-on-initial-test-failure": true
+  }
+}
