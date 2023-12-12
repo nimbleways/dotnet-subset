@@ -29,7 +29,7 @@ To learn more about the motivation behind `dotnet-subset`, please read [the rela
 dotnet tool install --global dotnet-subset
 ```
 ### From source
-Prerequisite: .NET SDK 2.1 or newer
+Prerequisite: .NET SDK 3.1 or newer
 
 1. Clone this repository
 2. Open a terminal in the repository's root
