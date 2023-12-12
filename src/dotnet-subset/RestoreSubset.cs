@@ -156,6 +156,9 @@ internal static class RestoreSubset
             }
         }
     }
+
+    private static readonly string[] NugetConfigFilenames = new[] { "nuget.config", "NuGet.config", "NuGet.Config" };
+
     private static IEnumerable<FileInfo> GetNugetConfigFiles(DirectoryInfo rootFolder, Dictionary<string, Project> projects)
     {
         static void GetNugetConfigFiles(DirectoryInfo rootFolder, DirectoryInfo folder, IDictionary<string, FileInfo> nugetConfigFiles)
@@ -165,8 +168,7 @@ internal static class RestoreSubset
                 return;
             }
 
-            var f = new[] { "nuget.config", "NuGet.config", "NuGet.Config" }
-                .Select(name => GetFullPathWithOriginalCase(GetFileInfo(name, folder)))
+            var f = NugetConfigFilenames.Select(name => GetFullPathWithOriginalCase(GetFileInfo(name, folder)))
                 .FirstOrDefault(f => f.Exists);
             if (f is not null)
             {

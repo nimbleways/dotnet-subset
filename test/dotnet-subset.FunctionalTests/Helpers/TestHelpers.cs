@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Reflection;
 
 using Nimbleways.Tools.Subset.Models;
@@ -46,7 +47,7 @@ internal static class TestHelpers
         }
     }
 
-    private static IReadOnlyCollection<FileInfo> GetTestsTomlFiles()
+    private static ImmutableArray<FileInfo> GetTestsTomlFiles()
     {
         DirectoryInfo resourcesDirectory = GetTestResourcesDirectory();
         EnsureExists(resourcesDirectory);
@@ -55,7 +56,7 @@ internal static class TestHelpers
             {
                 RecurseSubdirectories = true,
                 MaxRecursionDepth = 1,
-            }).ToArray();
+            }).ToImmutableArray();
     }
 
     private static DirectoryInfo GetTestResourcesDirectory()
