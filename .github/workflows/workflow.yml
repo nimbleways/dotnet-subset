@@ -80,10 +80,7 @@ jobs:
         name: job-tests-artifact
         path: artifacts/${{ env.Configuration }}/bin/
     - name: Install dotnet-subset
-      env:
-        http_proxy: "http://localhost:15937" # Random proxy
-        NUGET_ENABLE_ENHANCED_HTTP_RETRY: "false"
-      run:  dotnet tool install dotnet-subset --global --verbosity normal --ignore-failed-sources --add-source ./artifacts/${{ env.Configuration }}/nupkg/dotnet-subset/
+      run:  dotnet tool install dotnet-subset --global --verbosity detailed --configfile .config/nuget-local-install.config
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
