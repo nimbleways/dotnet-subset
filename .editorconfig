@@ -374,21 +374,22 @@ dotnet_diagnostic.IDE0058.severity = none
 # CA1062: Validate arguments of public methods
 dotnet_diagnostic.CA1062.severity = none
 
-# IDE0280: Use 'nameof'
-dotnet_diagnostic.IDE0280.severity = none
-
 # CA1032: Implement standard exception constructors
 dotnet_diagnostic.CA1032.severity = none
 
 # CA1707: Identifiers should not contain underscores
 dotnet_diagnostic.CA1707.severity = none
 
-# CA2007: Do not directly await a Task
-dotnet_diagnostic.CA2007.severity = none
+##### Unsupported features in currently used SDK ###########
+## .NET 8 ##
+dotnet_diagnostic.IDE0028.severity = none
+dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.IDE0300.severity = none
+dotnet_diagnostic.IDE0305.severity = none
 
-# IDE0046: Use conditional expression for return
-dotnet_diagnostic.IDE0046.severity = suggestion
-
+## .NET 7 ##
+dotnet_diagnostic.IDE0280.severity = none
+############################################################
 
 #### Custom config for entrypoint projects ####
 
