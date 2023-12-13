@@ -34,7 +34,7 @@ Prerequisite: .NET SDK 3.1 or newer
 1. Clone this repository
 2. Open a terminal in the repository's root
 3. `dotnet pack --configuration Release --version-suffix local`
-4. `dotnet tool update dotnet-subset --global --prerelease --add-source ./artifacts/Release/nupkg/dotnet-subset/`
+4. `dotnet tool update dotnet-subset --global --prerelease --configfile .config/nuget-local-install-release.config`
 
 ## Usage
 ```
