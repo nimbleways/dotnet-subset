@@ -80,7 +80,7 @@ jobs:
         name: job-tests-artifact
         path: artifacts/${{ env.Configuration }}/bin/
     - name: Install dotnet-subset
-      run:  dotnet tool install dotnet-subset --global --verbosity detailed --configfile .config/nuget-local-install.config
+      run:  dotnet tool install dotnet-subset --global --verbosity detailed --configfile .config/nuget-local-install-release.config
     - name: Show dotnet-subset version
       run: dotnet subset --version
     - name: Functional Tests
